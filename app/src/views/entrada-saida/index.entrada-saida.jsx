@@ -17,45 +17,48 @@ import { Search } from '../../search'
 
 
 const options = [
-  { label: "Parceiro", value: "apple" },
-  { label: "Cliente", value: "banana" },
-  { label: "Número", value: "cherry" },
+  { label: "Parceiro", value: "parceiro" },
+  { label: "Cliente", value: "cliente" },
+  { label: "Número", value: "trans_cab" },
   { label: "CPF", value: "cpf" },
   { label: "Cód. barras", value: "codbarra" },
 ];
 
-function ComboBoxWithInput() {
+function ComboBoxWithInput({ onFilterChange }) {
   const [searchText, setSearchText] = useState("");
   const [selectedValue, setSelectedValue] = useState(null);
 
-  // Filtra opções com base no texto digitado
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(searchText.toLowerCase())
-  );
+  // Chama a função de filtro sempre que o dropdown ou input mudar
+  const handleFilterChange = (newSelectedValue, newSearchText) => {
+    setSelectedValue(newSelectedValue);
+    setSearchText(newSearchText);
+    onFilterChange(newSelectedValue, newSearchText);
+  };
 
   return (
     <InputGroup inside style={{ width: 320 }}>
       {/* Dropdown de seleção à esquerda */}
       <SelectPicker
         appearance="subtle"
-        data={filteredOptions}
-        searchable={false} // O próprio input faz a busca
+        data={options}
+        searchable={false}
         value={selectedValue}
-        onChange={setSelectedValue}
+        onChange={(value) => handleFilterChange(value, searchText)}
         style={{ minWidth: 120, maxWidth: 120 }}
-        placement="bottomStart" // Garante que o menu abre corretamente
+        placement="bottomStart"
         cleanable
       />
 
-      {/* Input para busca à direita */}
+      {/* Input de busca à direita */}
       <Input
         placeholder="Digite para buscar..."
         value={searchText}
-        onChange={setSearchText}
+        onChange={(value) => handleFilterChange(selectedValue, value)}
       />
     </InputGroup>
   );
 }
+
 
 export class EntradaSaida extends React.Component {
 
@@ -63,7 +66,6 @@ export class EntradaSaida extends React.Component {
 
   state = {
     request: {
-      filter: {apenasMercadoLivre: false, parceiro: ''},
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
       final: dayjs().format('YYYY-MM-DD'),
       empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"}
@@ -96,7 +98,7 @@ export class EntradaSaida extends React.Component {
         this.setState({loading: true})
         let result = await new Service().Post('entrada-saida/lista', this.state.request)
         result.data.response['rows2'] = result.data.response['rows']
-        this.setState({...result.data })
+        this.setState({...result.data }, () => this.filtrar())
         
       } catch (error) {
         Exception.error(error)
@@ -195,6 +197,39 @@ export class EntradaSaida extends React.Component {
   }
   */
 
+  filtrar = (picker, input) => {
+
+    let rows2 = _.filter(this.state?.response?.rows, (item) => {
+
+      if (_.isEmpty(input)) return true;
+  
+      switch (picker) {
+        case "parceiro": // Parceiro
+          return item.parc?.parceiro?.toUpperCase().includes(input.toUpperCase());
+        case "cliente": // Cliente
+          return item.nome1?.toUpperCase().includes(input.toUpperCase()) || item.nome2?.toUpperCase().includes(input.toUpperCase());
+        case "trans_cab": // Número
+          return item.trans_cab.toString().includes(input);
+        case "cpf": // CPF
+          return JSON.parse(item.cpf)["3"].toString().includes(input);
+        case "codbarra": // Código de barras
+          return item.codbarra?.toString().includes(input);
+        default:
+          return true;
+      }
+
+    })
+
+    if (this.state.apenasMercadoLivre) {
+      rows2 = _.filter(rows2, (item) => item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
+    } else {
+      rows2 = _.filter(rows2, (item) => !item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
+    }
+  
+    this.setState({ response: { ...this.state.response, rows2 } });
+    
+  };
+
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
     { selector: (row) => row.trans_cab, name: 'Número', center: true, minWidth: '80px', maxWidth: '80px'},
@@ -248,9 +283,11 @@ export class EntradaSaida extends React.Component {
             </Stack>
             
             <div style={{marginTop: '15px', display: 'flex'}}>
-              <ComboBoxWithInput />
-              <Checkbox>Apenas MERCADO LIVRE</Checkbox>
-              {/*<Filter filter={this.state?.request?.filter} onChange={(filter) => this.setState({request: {...this.state.request, filter}}, () => this.onSearch())} />*/}
+              <ComboBoxWithInput onFilterChange={this.filtrar} />
+              <div style={{marginTop: '10px', marginLeft: '15px'}}>
+                <input type="checkbox" id="aceitar" checked={this.state?.apenasMercadoLivre} onChange={(event) => this.setState({apenasMercadoLivre: event.target.checked}, () => this.filtrar())} />
+                <label for="aceitar" style={{cursor: 'pointer'}}> Apenas MERCADO LIVRE</label>
+              </div>
             </div>
 
           </Stack>

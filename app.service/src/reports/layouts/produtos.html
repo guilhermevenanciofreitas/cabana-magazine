@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório</title>
+    <style>
+
+      body {
+        font-family: Arial, sans-serif;
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 0.4px solid black;
+        padding: 2px;
+        text-align: left;
+        font-size: 12px;
+      }
+      th {
+        padding: 2px;
+        text-align: left;
+        font-size: 12px;
+      }
+      .summary {
+        margin-top: 40px;
+        page-break-before: always;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nome</th>
+          <th>Unid</th>
+          <th style="text-align: right;">Custo</th>
+          <th style="text-align: right;">Custo Médio</th>
+          <th style="text-align: right;">Ult. Compra</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.items.forEach(item => { %>
+          <tr>
+            <td><%= item.codprod %></td>
+            <td><%= item.descricao %></td>
+            <td><%= item.unidade %></td>
+            <td style="text-align: right;"><%= item.custo?.toFixed(2) || '0.00' %></td>
+            <td style="text-align: right;"><%= item.customed?.toFixed(2) || '0.00' %></td>
+            <td style="text-align: right;"><%= item.ultcomp?.toFixed(2) || '0.00' %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+  </body>
+</html>

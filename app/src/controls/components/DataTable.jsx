@@ -7,6 +7,30 @@ import { Loader, Placeholder } from 'rsuite';
 
 //import './DataTable.css';
 
+const customStyles = {
+  headRow: {
+    style: {
+      padding: "0px",  
+      margin: "0px",
+    },
+  },
+  headCells: {
+    style: {
+      padding: "0px",
+    },
+  },
+  rows: {
+    style: {
+      padding: "0px", // Remove padding das linhas
+      margin: "0px",
+    },
+  },
+  cells: {
+    style: {
+      padding: "0px", // Remove padding das células
+    },
+  },
+};
 
 const ControlDataTable = ({height, dense = true, loading, columns, rows, noDataComponent, style, selectedRows, onItem, OnSort, onSelected, showAways = false, placeholder = 8}) => {
 
@@ -41,6 +65,7 @@ const ControlDataTable = ({height, dense = true, loading, columns, rows, noDataC
           progressPending={loading}
           //progressComponent={<Spinner size={null} color='primary' />}
           onSelectedRowsChange={(args) => onSelected(args.selectedRows)}
+          customStyles={customStyles}
       />
     }
     </div>

@@ -86,6 +86,7 @@ export class EntradaSaidaController {
 
         let whereFiltro = ''
 
+        /*
         if (filter?.cliente) {
           whereFiltro += ` AND (cab.payment_firstname LIKE '%${filter.cliente.replace(' ', '%')}%' OR cab.payment_lastname LIKE '%${filter.cliente.replace(' ', '%')}%') `
         }
@@ -101,6 +102,7 @@ export class EntradaSaidaController {
         if (filter?.codbarra) {
           whereFiltro += ` AND (op2.codigo_de_barra LIKE '%${filter.codbarra.replace(' ', '%')}%') `
         }
+        */
 
         const query = `
           SELECT 
@@ -185,16 +187,18 @@ export class EntradaSaidaController {
 
         items = _.filter(items, (item) => item.status?.toUpperCase()?.includes('CONFIR'))
 
+        /*
         if (filter?.apenasMercadoLivre) {
           items = _.filter(items, (item) => item.parc?.parceiro?.toUpperCase()?.includes('MERCADO LIBRE'))
         }
         else {
           items = _.filter(items, (item) => item.parc?.parceiro?.toUpperCase()?.includes(filter?.parceiro) && !item.parc?.parceiro?.toUpperCase()?.includes('MERCADO LIBRE'))
         }
+        */
         
         res.status(200).json({
           request: {
-            inicio, final, empresa, filter, limit, offset
+            inicio, final, empresa, limit, offset
           },
           response: {
             rows: items, count: items.length,//rows: orders.rows, count: orders.count

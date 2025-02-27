@@ -21,6 +21,7 @@ const NavItem = props => {
 const Frame = (props) => {
   const { navs } = props;
   const [expand, setExpand] = useState(true);
+  const [hoverExpand, setHoverExpand] = useState(false);
   const [windowHeight, setWindowHeight] = useState(getHeight(window));
 
   useEffect(() => {
@@ -32,25 +33,43 @@ const Frame = (props) => {
     };
   }, []);
 
+  const handleMouseEnter = () => {
+    if (!expand) setHoverExpand(true);
+  };
+
+  const handleMouseLeave = () => {
+    if (!expand) setHoverExpand(false);
+  };
+
   const containerClasses = classNames('page-container', {
     'container-full': !expand
   });
 
-  const navBodyStyle = expand
-    ? { height: windowHeight - 112, overflow: 'auto' }
+  const navBodyStyle = expand || hoverExpand
+    ? { height: 'calc(100vh - 112px)', overflow: 'auto' }
     : {};
 
   return (
-    <Container className="frame">
+    <Container className="frame" style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}>
       <Sidebar
-        style={{ display: 'flex', flexDirection: 'column' }}
-        width={expand ? 260 : 56}
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          height: '100vh', 
+          transition: 'width 0.3s', 
+          borderRight: hoverExpand ? '0.1px solid #ddd' : 'none',
+          overflow: 'hidden',
+          zIndex: 1000
+        }}
+        width={expand || hoverExpand ? 260 : 56}
         collapsible
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <Sidenav.Header>
           <Brand />
         </Sidenav.Header>
-        <Sidenav expanded={expand} appearance="subtle" defaultOpenKeys={['2', '3']}>
+        <Sidenav expanded={expand || hoverExpand} appearance="subtle" defaultOpenKeys={['2', '3']}>
           <Sidenav.Body style={navBodyStyle}>
             <Nav>
               {navs.map(item => {
@@ -64,7 +83,6 @@ const Frame = (props) => {
                     </Nav.Menu>
                   );
                 }
-
                 if (rest.target === '_blank') {
                   return (
                     <Nav.Item key={item.eventKey} {...rest}>
@@ -72,7 +90,6 @@ const Frame = (props) => {
                     </Nav.Item>
                   );
                 }
-
                 return <NavItem key={rest.eventKey} {...rest} />;
               })}
             </Nav>
@@ -81,9 +98,9 @@ const Frame = (props) => {
         <NavToggle expand={expand} onChange={() => setExpand(!expand)} />
       </Sidebar>
 
-      <Container className={containerClasses}>
+      <Container className={containerClasses} style={{ height: '100vh', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Header />
-        <Content>
+        <Content style={{ flex: 1, overflow: 'auto' }}>
           <Outlet />
         </Content>
       </Container>

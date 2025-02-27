@@ -1,5 +1,5 @@
-import React from 'react'
-import { Badge, Button, Checkbox, Divider, Drawer, HStack, IconButton, List, Loader, Message, Nav, Panel, Popover, Row, Stack, toaster, Whisper } from 'rsuite'
+import React, { useState } from 'react'
+import { Badge, Button, Checkbox, Divider, Drawer, HStack, IconButton, Input, InputGroup, List, Loader, Message, Nav, Panel, Popover, Row, SelectPicker, Stack, toaster, Whisper } from 'rsuite'
 
 import dayjs from 'dayjs'
 
@@ -15,82 +15,46 @@ import _ from 'lodash'
 import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
 
-class Filter extends React.Component {
 
-  /*
-  state = {
-    filter: {
-      apenasMercadoLivre: true
-    }
-  }
-  */
+const options = [
+  { label: "Parceiro", value: "apple" },
+  { label: "Cliente", value: "banana" },
+  { label: "Número", value: "cherry" },
+  { label: "CPF", value: "cpf" },
+  { label: "Cód. barras", value: "codbarra" },
+];
 
-  onApply = () => {
-      this.setState({open: false}, () => this.props.onChange(this.state.filter))
-  }
+function ComboBoxWithInput() {
+  const [searchText, setSearchText] = useState("");
+  const [selectedValue, setSelectedValue] = useState(null);
 
-  render() {
+  // Filtra opções com base no texto digitado
+  const filteredOptions = options.filter(option =>
+    option.label.toLowerCase().includes(searchText.toLowerCase())
+  );
 
-      //const appliedFiltersCount = _.size(Object.values(this.props?.filter || {}).filter(Boolean))
+  return (
+    <InputGroup inside style={{ width: 320 }}>
+      {/* Dropdown de seleção à esquerda */}
+      <SelectPicker
+        appearance="subtle"
+        data={filteredOptions}
+        searchable={false} // O próprio input faz a busca
+        value={selectedValue}
+        onChange={setSelectedValue}
+        style={{ minWidth: 120, maxWidth: 120 }}
+        placement="bottomStart" // Garante que o menu abre corretamente
+        cleanable
+      />
 
-      const filteredFilters = _.omit(this.props?.filter || {}, 'apenasMercadoLivre');
-      const appliedFiltersCount = _.size(Object.values(filteredFilters).filter(Boolean));
-      
-      return <>
-
-        <Button appearance="subtle" onClick={() => this.setState({ open: true, filter: this.props.filter })}>
-          <FaFilter /> &nbsp; Filtros &nbsp; {appliedFiltersCount > 0 && <Badge content={appliedFiltersCount} />}
-        </Button>
-
-          <Drawer open={this.state?.open} onClose={() => this.setState({open: false})} size="xs">
-              <Drawer.Header><Drawer.Title>Filtros</Drawer.Title></Drawer.Header>
-              <Drawer.Body style={{padding: '30px'}}>
-                  <Row gutterWidth={0}>
-                    <Checkbox checked={this.state?.filter?.apenasMercadoLivre} onChange={(checked) => {
-                      console.log(checked)
-                      this.setState({ filter: {...this.state.filter, apenasMercadoLivre: event.target.checked, parceiro: event.target.checked ? 'MERCADO LIBRE' : ''} })
-                    }}>Apenas MERCADO LIVRE</Checkbox>
-                    <Divider></Divider>
-                    <div className='form-control'>
-                      <label class="textfield-filled">
-                          <input type='text' value={this.state?.filter?.parceiro} onChange={(event) => this.setState({ filter: {...this.state.filter, parceiro: event.target.value} })} readOnly={this.state?.filter?.apenasMercadoLivre} />
-                          <span>Parceiro</span>
-                      </label>
-                    </div>
-                    <div className='form-control'>
-                      <label class="textfield-filled">
-                        <input type='text' value={this.state?.filter?.cliente} onChange={(event) => this.setState({ filter: {...this.state.filter, cliente: event.target.value} })} />
-                          <span>Cliente</span>
-                      </label>
-                    </div>
-                    <div className='form-control'>
-                      <label class="textfield-filled">
-                        <input type='text' value={this.state?.filter?.numero} onChange={(event) => this.setState({ filter: {...this.state.filter, numero: event.target.value} })} />
-                          <span>Número</span>
-                      </label>
-                    </div>
-                    <div className='form-control'>
-                      <label class="textfield-filled">
-                          <input type='text' value={this.state?.item?.cpf} onChange={(event) => this.setState({ filter: {...this.state.filter, cpf: event.target.value} })} />
-                          <span>CPF</span>
-                      </label>
-                    </div>
-                    <div className='form-control'>
-                      <label class="textfield-filled">
-                          <input type='text' value={this.state?.item?.codbarra} onChange={(event) => this.setState({ filter: {...this.state.filter, codbarra: event.target.value} })} />
-                          <span>Cod. barras</span>
-                      </label>
-                    </div>
-                    <Divider />
-                    <div className='form-control'>
-                        <Button appearance="primary" color='green' onClick={this.onApply}><FaCheckCircle /> &nbsp; Filtrar</Button>
-                    </div>
-                  </Row>
-              </Drawer.Body>
-          </Drawer>
-
-      </>
-  }
+      {/* Input para busca à direita */}
+      <Input
+        placeholder="Digite para buscar..."
+        value={searchText}
+        onChange={setSearchText}
+      />
+    </InputGroup>
+  );
 }
 
 export class EntradaSaida extends React.Component {
@@ -232,22 +196,22 @@ export class EntradaSaida extends React.Component {
   */
 
   columns = [
-    { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', minWidth: '55px', maxWidth: '55px'},
-    { selector: (row) => row.trans_cab, name: 'Número', minWidth: '80px', maxWidth: '80px'},
-    { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '180px', maxWidth: '180px'},
-    { selector: (row) => dayjs(row.dataped).format('DD/MM/YYYY'), name: 'Data', maxWidth: '60px'},
-    { selector: (row) => dayjs(row.dataped).format('HH:mm'), name: 'Hora', maxWidth: '30px'},
+    { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
+    { selector: (row) => row.trans_cab, name: 'Número', center: true, minWidth: '80px', maxWidth: '80px'},
+    { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
+    { selector: (row) => dayjs(row.dataped).format('DD/MM/YYYY'), name: 'Data', center: true, minWidth: '90px', maxWidth: '90px'},
+    { selector: (row) => dayjs(row.dataped).format('HH:mm'), name: 'Hora', center: true, minWidth: '60px', maxWidth: '60px'},
     { selector: (row) => `${row.nome1} ${row.nome2}`, name: 'Cliente', maxWidth: '250px'},
-    { selector: (row) => row.codprod, name: 'Cód. prod', minWidth: '85px', maxWidth: '85px'},
-    { selector: (row) => row.codbarra, name: 'Cod. barras', minWidth: '130px', maxWidth: '130px'},
+    { selector: (row) => row.codprod, name: 'Cód. prod', center: true,  minWidth: '75px', maxWidth: '75px'},
+    { selector: (row) => row.codbarra, name: 'Cod. barras', center: true, minWidth: '130px', maxWidth: '130px'},
     { selector: (row) => row.descricao, name: 'Descrição'},
-    { selector: (row) => row.tamanho, name: 'Tamanho', minWidth: '90px', maxWidth: '90px'},
-    { selector: (row) => row.qtde, name: 'Qtde', minWidth: '60px', maxWidth: '60px'},
-    { selector: (row) => row.codloja, name: 'Loja', minWidth: '60px', maxWidth: '60px'},
-    { selector: (row) => row.codcaixa, name: 'Cod. caixa', maxWidth: '30px'},
-    { selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', maxWidth: '110px'},
+    { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
+    { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
+    { selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
+    { selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
+    { selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '110px', maxWidth: '110px'},
     { selector: (row) => row.obs, name: 'Obs', minWidth: '150px', maxWidth: '150px'},
-    { selector: (row) => row.estoq, name: 'Gaveta', maxWidth: '30px'},
+    { selector: (row) => row.estoq, name: 'Gaveta', minWidth: '50px', maxWidth: '50px'},
   ]
 
   render = () => {
@@ -260,7 +224,7 @@ export class EntradaSaida extends React.Component {
         <PageContent>
           
           <Stack direction='row' alignItems='flexStart' justifyContent='space-between'>
-            <Stack spacing={5}>
+            <Stack spacing={0}>
               <div className='form-control'>
                   <label class="textfield-filled">
                       <input type='date' value={this.state?.request?.inicio} onChange={(event) => this.setState({request: {...this.state?.request, inicio: event.target.value}})} />
@@ -273,7 +237,7 @@ export class EntradaSaida extends React.Component {
                       <span>Final</span>
                   </label>
               </div>
-              <div className='form-control' style={{width: '340px'}}>
+              <div className='form-control' style={{width: '300px'}}>
                   <AutoComplete label='Empresa' value={this.state?.request.empresa} text={(item) => `${item.loj_nome}`} onChange={(empresa) => this.setState({request: {...this.state?.request, empresa}})} onSearch={async (search) => await Search.empresa(search, this.state?.tipoEntSai?.tipo)}>
                       <AutoComplete.Result>
                           {(item) => <span>{item.loj_nome}</span>}
@@ -281,12 +245,14 @@ export class EntradaSaida extends React.Component {
                   </AutoComplete>
               </div>
               <Button appearance="primary" color='blue' onClick={() => this.setState({request: {...this.state?.request, filter: this.state?.request.filter}}, () => this.onSearch())} disabled={this.state?.loading}>{this.state?.loading ? <><Loader /> &nbsp; Pesquisando...</> : <><FaSearch /> &nbsp; Pesquisar</>}</Button>
-             
-              <div style={{marginLeft: '60px'}}>
-                <Filter filter={this.state?.request?.filter} onChange={(filter) => this.setState({request: {...this.state.request, filter}}, () => this.onSearch())} />
-              </div>
-           
             </Stack>
+            
+            <div style={{marginTop: '15px', display: 'flex'}}>
+              <ComboBoxWithInput />
+              <Checkbox>Apenas MERCADO LIVRE</Checkbox>
+              {/*<Filter filter={this.state?.request?.filter} onChange={(filter) => this.setState({request: {...this.state.request, filter}}, () => this.onSearch())} />*/}
+            </div>
+
           </Stack>
 
           <hr></hr>

@@ -28,8 +28,8 @@ export class App {
       exposedHeaders: ['Last-Acess', 'Expire-In'],
     }
 
-    this.express.use(express.json({ limit: '50mb' })); // Aumenta o limite do JSON
-    this.express.use(express.urlencoded({ limit: '50mb', extended: true })); // Aumenta o limite para form-data
+    this.express.use(express.json({ limit: '50mb' }))
+    this.express.use(express.urlencoded({ limit: '50mb', extended: true }))
 
     this.express.use(cors(corsOptions))
     this.express.use(express.json())

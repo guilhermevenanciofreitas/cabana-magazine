@@ -112,17 +112,22 @@ export class Passo3Controller {
     //await Authorization.verify(req, res).then(async () => {
       try {
 
-        for (const item of req.body) {
-
-          const { numero, codprod, codprod1, codcaixa, obs } = item
-
-          const db = new AppContext2()
+        const db = new AppContext2()
   
-          await db.query(`UPDATE skill_cab_vendas SET separado = 1, codcaixa = ${codcaixa ?? 'NULL'}, observacao = '${obs ?? ''}', dtseparado = NOW() WHERE numero = ${numero} and codprod = ${codprod} and codprod1 = ${codprod1}`, {
-            type: Sequelize.QueryTypes.UPDATE,
-          })
+        await db.transaction(async (transaction) => {
+
+          for (const item of req.body) {
+
+            const { numero, codprod, codprod1, codcaixa, obs } = item
   
-        }
+            await db.query(`UPDATE skill_cab_vendas SET separado = 1, codcaixa = ${codcaixa ?? 'NULL'}, observacao = '${obs ?? ''}', dtseparado = NOW() WHERE numero = ${numero} and codprod = ${codprod} and codprod1 = ${codprod1}`, {
+              type: Sequelize.QueryTypes.UPDATE,
+              transaction
+            })
+    
+          }
+
+        })
 
         res.status(200).json({})
 

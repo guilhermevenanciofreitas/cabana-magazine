@@ -169,9 +169,7 @@ export class Passo5 extends React.Component {
         return {
           numero: item.trans_cab,
           codprod: item.codprod,
-          codprod1: item.codprod1,
-          codcaixa: item.codcaixa,
-          obs: item.obs
+          codprod1: item.codprod1
         }
       }))
 

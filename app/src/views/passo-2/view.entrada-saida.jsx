@@ -17,6 +17,7 @@ export class ViewEntradaSaida extends React.Component {
 
         return this.viewModal.current.show()
     }
+    
 
     salvar = async () => {
 

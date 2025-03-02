@@ -1,20 +1,20 @@
 import React, { useState } from 'react'
-import { Badge, Button, Checkbox, Divider, Drawer, HStack, IconButton, Input, InputGroup, List, Loader, Message, Nav, Panel, Popover, Row, SelectPicker, Stack, toaster, Whisper } from 'rsuite'
+import { Button, Input, InputGroup, Loader, Message, Nav, Panel, SelectPicker, Stack, toaster } from 'rsuite'
 
 import dayjs from 'dayjs'
 
 import PageContent from '../../components/PageContent'
 
-import { AutoComplete, CustomBreadcrumb, CustomPagination, CustomSearch, DataTable } from '../../controls'
-import { FaCheck, FaCheckCircle, FaCircle, FaEdit, FaEllipsisV, FaFileDownload, FaFilter, FaPlusCircle, FaPrint, FaSearch, FaTrash, FaUpload } from 'react-icons/fa'
+import { AutoComplete, CustomBreadcrumb, DataTable } from '../../controls'
+import { FaCheckCircle, FaSearch } from 'react-icons/fa'
 import { Service } from '../../service'
-
-import { ViewEntradaSaida } from './view.entrada-saida'
 
 import _ from 'lodash'
 import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
+import { Loading } from '../../App'
 
+import { ViewEntradaSaida } from '../passo-2/view.entrada-saida'
 
 const options = [
   { label: "Parceiro", value: "parceiro" },
@@ -62,8 +62,6 @@ function ComboBoxWithInput({ onFilterChange }) {
 
 export class EntradaSaida extends React.Component {
 
-  ViewEntradaSaida = React.createRef()
-
   state = {
     request: {
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
@@ -75,6 +73,8 @@ export class EntradaSaida extends React.Component {
   onSearch = async () => {
     this.setState({loading: true}, async () => {
       try {
+
+        Loading.Show('Buscando...')
         
         const errors = []
 
@@ -96,16 +96,51 @@ export class EntradaSaida extends React.Component {
         }
 
         this.setState({loading: true})
-        let result = await new Service().Post('entrada-saida/lista', this.state.request)
+        let result = await new Service().Post('passo-2/lista', this.state.request)
         result.data.response['rows2'] = result.data.response['rows']
         this.setState({...result.data }, () => this.filtrar())
         
       } catch (error) {
         Exception.error(error)
       } finally {
+        Loading.Hide()
         this.setState({loading: false})
       }
     })
+  }
+
+  
+  filtrar = (picker, input) => {
+
+    let rows2 = _.filter(this.state?.response?.rows, (item) => {
+
+      if (_.isEmpty(input)) return true;
+  
+      switch (picker) {
+        case "parceiro": // Parceiro
+          return item.parc?.parceiro?.toUpperCase().includes(input.toUpperCase())
+        case "cliente": // Cliente
+          return item.nome1?.toUpperCase().includes(input.toUpperCase()) || item.nome2?.toUpperCase().includes(input.toUpperCase())
+        case "trans_cab": // Número
+          return item.trans_cab.toString().includes(input)
+        case "cpf": // CPF
+          return JSON.parse(item.cpf)["3"].toString().includes(input)
+        case "codbarra": // Código de barras
+          return item.codbarra?.toString().includes(input)
+        default:
+          return true
+      }
+
+    })
+
+    if (this.state.apenasMercadoLivre) {
+      rows2 = _.filter(rows2, (item) => item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
+    } else {
+      rows2 = _.filter(rows2, (item) => !item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
+    }
+  
+    this.setState({ response: { ...this.state.response, rows2 } })
+    
   }
 
   onEditar = async (row) => {
@@ -117,15 +152,15 @@ export class EntradaSaida extends React.Component {
       const rows = this.state.response.rows.map(item => item.trans_cab === row.trans_cab ? { ...item, checked: true } : item)
 
       this.setState({response: {...this.state.response, rows}}, async () => {
-        this.onAlteraRegistro(item, item.codcaixa, item.obs)
+        this.onAlteraRegistro(item)
       })
 
     }
 
   }
 
-  onAlteraRegistro = (row, codcaixa, obs) => {
-    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab ? { ...item, codcaixa, obs } : item)
+  onAlteraRegistro = (row) => {
+    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab ? { ...item } : item)
     this.setState({response: {...this.state.response, rows2}})
   }
 
@@ -135,15 +170,7 @@ export class EntradaSaida extends React.Component {
 
     this.setState({response: {...this.state.response, rows2}}, async () => {
       
-      let codcaixa, obs = ''
-
-      if (checked) {
-        const item = await this.onEditar(row)
-        codcaixa = item.codcaixa || ''
-        obs = item.obs || ''
-      }
-
-      this.onAlteraRegistro(row, codcaixa, obs)
+      this.onAlteraRegistro(row)
 
     })
 
@@ -156,7 +183,7 @@ export class EntradaSaida extends React.Component {
 
       this.setState({submting: true})
 
-      await new Service().Post('entrada-saida/salvar', _.map(selecteds, (item) => {
+      await new Service().Post('passo-2/salvar', _.map(selecteds, (item) => {
         return {
           numero: item.trans_cab,
           codprod: item.codprod,
@@ -176,59 +203,6 @@ export class EntradaSaida extends React.Component {
       this.setState({submting: false})
     }
   }
-
-  /*
-  filtrar = ({picker, input}) => {
-
-    const rows2 = _.filter(this.state?.response?.rows, (item) => {
-
-      if (_.isEmpty(input)) return true
-
-      if (picker == 'parceiro') return item.parc?.parceiro?.toUpperCase().includes(input.toUpperCase())
-      if (picker == 'cliente') return item.nome1?.toUpperCase().includes(input.toUpperCase()) || item.nome2?.toUpperCase().includes(input.toUpperCase())
-      if (picker == 'numero') return item.trans_cab.toString().includes(input)
-      if (picker == 'cpf') return JSON.parse(item.cpf)['3'].toString().includes(input)
-      if (picker == 'codbarras') return item.codbarra?.toString().includes(input)
-
-    })
-
-    this.setState({response: {...this.state.response, rows2 }})
-
-  }
-  */
-
-  filtrar = (picker, input) => {
-
-    let rows2 = _.filter(this.state?.response?.rows, (item) => {
-
-      if (_.isEmpty(input)) return true;
-  
-      switch (picker) {
-        case "parceiro": // Parceiro
-          return item.parc?.parceiro?.toUpperCase().includes(input.toUpperCase());
-        case "cliente": // Cliente
-          return item.nome1?.toUpperCase().includes(input.toUpperCase()) || item.nome2?.toUpperCase().includes(input.toUpperCase());
-        case "trans_cab": // Número
-          return item.trans_cab.toString().includes(input);
-        case "cpf": // CPF
-          return JSON.parse(item.cpf)["3"].toString().includes(input);
-        case "codbarra": // Código de barras
-          return item.codbarra?.toString().includes(input);
-        default:
-          return true;
-      }
-
-    })
-
-    if (this.state.apenasMercadoLivre) {
-      rows2 = _.filter(rows2, (item) => item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
-    } else {
-      rows2 = _.filter(rows2, (item) => !item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
-    }
-  
-    this.setState({ response: { ...this.state.response, rows2 } });
-    
-  };
 
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
@@ -252,7 +226,7 @@ export class EntradaSaida extends React.Component {
   render = () => {
 
     return (
-      <Panel header={<CustomBreadcrumb title={'Movimentação'} />}>
+      <Panel header={<CustomBreadcrumb title={'Separado'} />}>
 
         <ViewEntradaSaida ref={this.ViewEntradaSaida} />
 
@@ -279,7 +253,7 @@ export class EntradaSaida extends React.Component {
                       </AutoComplete.Result>
                   </AutoComplete>
               </div>
-              <Button appearance="primary" color='blue' onClick={() => this.setState({request: {...this.state?.request, filter: this.state?.request.filter}}, () => this.onSearch())} disabled={this.state?.loading}>{this.state?.loading ? <><Loader /> &nbsp; Pesquisando...</> : <><FaSearch /> &nbsp; Pesquisar</>}</Button>
+              <Button appearance="primary" color='blue' onClick={() => this.setState({request: {...this.state?.request, filter: this.state?.request.filter}}, () => this.onSearch())} disabled={this.state?.loading}>{this.state?.loading ? <><Loader /> &nbsp; Buscando...</> : <><FaSearch /> &nbsp; Buscar</>}</Button>
             </Stack>
             
             <div style={{marginTop: '15px', display: 'flex'}}>
@@ -314,5 +288,7 @@ export class EntradaSaida extends React.Component {
         </PageContent>
       </Panel>
     )
+
   }
+
 }

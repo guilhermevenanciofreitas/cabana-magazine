@@ -1,10 +1,10 @@
 import { Router } from 'express'
-import { EntradaSaidaController } from '../../controllers/entradaSaida.controller.js'
+import { Passo2Controller } from '../../controllers/passo-2.controller.js'
 
-export class EntradaSaidaRoute {
+export class Passo2Route {
 
     router = Router()
-    controller = new EntradaSaidaController()
+    controller = new Passo2Controller()
 
     constructor() {
         this.intializeRoutes()

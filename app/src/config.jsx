@@ -8,10 +8,16 @@ import { FaArchive, FaCalendar, FaCalendarDay, FaCalendarTimes, FaCalendarWeek, 
 
 export const appNavs = [
   {
-    eventKey: 'entrada-saida',
+    eventKey: 'passo-1',
     icon: <Icon as={MdDashboard} />,
-    title: 'Movimentação',
-    to: '/entrada-saida'
+    title: 'Lista',
+    to: '/passo-1'
+  },
+  {
+    eventKey: 'passo-2',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Separado',
+    to: '/passo-2'
   },
   /*
   {

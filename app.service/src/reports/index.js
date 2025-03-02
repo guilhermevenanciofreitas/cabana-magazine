@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 
 export class Report {
 
-  static generate = async ({report, title, data}) => {
+  static generate = async ({report, company, title, data}) => {
     
     const options = {
       title,
@@ -39,7 +39,7 @@ export class Report {
         const headerTemplate = `
             <div style="width: 100%; font-size: 12px; font-family: Arial, sans-serif; border-bottom: 1px solid #ccc; margin: 20px;">
                 <div style="display: flex; justify-content: space-between; padding: 5px;">
-                    <span style="font-size: 18px; font-weight: bold;">GASTROBAR</span>
+                    <span style="font-size: 18px; font-weight: bold;">${company}</span>
                     <span style="font-size: 10px;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></span>
                 </div>
                 <div style="display: flex; justify-content: space-between; padding: 5px;">
@@ -52,6 +52,7 @@ export class Report {
 
         const pdfBase64 = await page.pdf({
             format: "A4",
+            landscape: true,
             displayHeaderFooter: true,
             headerTemplate: headerTemplate,
             /*footerTemplate: `

@@ -33,12 +33,13 @@ export class AppContext extends Sequelize {
   constructor() {
 
     super({
-      host: '167.172.255.32',  // Coloque o endereço do seu servidor MySQL
-      port: 3306,         // A porta padrão do MySQL é 3306
-      database: 'cabana_loja', // Nome do banco de dados
-      username: 'cabana_loja',    // Seu usuário MySQL
-      password: 'hY3TfP2065vkNsN7', // Sua senha MySQL
-      dialect: 'mysql',    // Dialeto para MySQL
+      host: '167.172.255.32',
+      //host: '10.108.0.2',
+      port: 3306,
+      database: 'cabana_loja',
+      username: 'cabana_loja',
+      password: 'hY3TfP2065vkNsN7',
+      dialect: 'mysql',
       timezone: "America/Sao_Paulo",
       define: { 
         timestamps: false, 

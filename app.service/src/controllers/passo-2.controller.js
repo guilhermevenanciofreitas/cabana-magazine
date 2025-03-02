@@ -17,7 +17,7 @@ import { Exception } from "../utils/exception.js"
 import sql from 'mssql'
 import { AppContext2 } from "../database2/index.js"
 
-export class EntradaSaidaController {
+export class Passo2Controller {
 
   lista = async (req, res) => {
     //await Authorization.verify(req, res).then(async ({company}) => {
@@ -28,81 +28,8 @@ export class EntradaSaidaController {
         const db = new AppContext()
         const db2 = new AppContext2()
 
-        const search = req.body.search
-        const filter = req.body.filter
         const limit = req.body.limit || 50
         const offset = req.body.offset || 0
-
-        const where = []
-
-        /*
-        if (search?.input) {
-
-          if (search?.picker == 'descricao') {
-            where.push({'descricao': {[Sequelize.Op.like]: `%${search.input.replace(' ', "%")}%`}})
-          }
-  
-        }
-        */
-        /*
-        const orders = await db.OrderProduct.findAndCountAll({
-          attributes: [
-            //[Sequelize.col('orderStatus.name'), 'status'],
-            //[Sequelize.col('orderProduct.order_product_id'), 'trans_det'],
-            //[Sequelize.col('orderProduct.order_id'), 'trans_cab'],
-            [Sequelize.col('orderProduct.product_id'), 'codprod'],
-            //[Sequelize.col('orderOption.product_option_value_id'), 'codprod1'],
-            //[Sequelize.fn('CONVERT', Sequelize.col('OrderProduct.name'), 'VARCHAR(100)'), 'descri1'],
-            //[Sequelize.col('orderProduct.model'), 'modelo'],
-            //[Sequelize.fn('CONVERT', Sequelize.col('ProductOptionValue.codigo_de_barra'), 'VARCHAR(16)'), 'codbarra'],
-            //[Sequelize.fn('CONVERT', Sequelize.col('ProductDescription.name'), 'VARCHAR(100)'), 'descricao'],
-            //[Sequelize.col('ProductOptionValue.option_id'), 'option_id'],
-            //[Sequelize.col('ProductOptionValue.option_value_id'), 'option_value_id'],
-            //[Sequelize.col('OptionValueDescription.name'), 'tamanho'],
-            [Sequelize.col('orderProduct.quantity'), 'qtde'],
-            [Sequelize.col('orderProduct.price'), 'precounit'],
-            [Sequelize.col('orderProduct.total'), 'total_item'],
-            //[Sequelize.col('total'), 'total_venda'],
-            //[Sequelize.col('custom_field'), 'cpf'],
-            //[Sequelize.fn('CONVERT', Sequelize.col('payment_custom_field'), 'VARCHAR(50)'), 'compl'],
-            //[Sequelize.col('OrderTotal.value'), 'frete'],
-            //[Sequelize.literal("'S'"), 'separado'],
-            //[Sequelize.literal("'     '"), 'estoq'],
-            //[Sequelize.col('telephone'), 'fone'],
-          ],
-          include: [
-            {model: db.Order, as: 'order', attributes: ['date_added', 'customer_id', 'payment_firstname', 'payment_lastname', 'payment_address_1', 'payment_address_2', 'payment_city', 'payment_zone', 'payment_postcode', 'order_status_id', 'email']}
-          ],
-          limit: limit,
-          offset: offset * limit,
-          where: {
-            '$order.date_added$': {
-              [Sequelize.Op.between]: ['2025-02-13', '2025-02-23']
-            },
-            '$order.order_status_id$': 19
-          }
-        })
-        */
-
-        let whereFiltro = ''
-
-        /*
-        if (filter?.cliente) {
-          whereFiltro += ` AND (cab.payment_firstname LIKE '%${filter.cliente.replace(' ', '%')}%' OR cab.payment_lastname LIKE '%${filter.cliente.replace(' ', '%')}%') `
-        }
-
-        if (filter?.numero) {
-          whereFiltro += ` AND (det.order_id LIKE '%${filter.numero.replace(' ', '%')}%') `
-        }
-
-        if (filter?.cpf) {
-          whereFiltro += ` AND (cab.custom_field LIKE '%${filter.cpf.replace(' ', '%')}%') `
-        }
-
-        if (filter?.codbarra) {
-          whereFiltro += ` AND (op2.codigo_de_barra LIKE '%${filter.codbarra.replace(' ', '%')}%') `
-        }
-        */
 
         const query = `
           SELECT 
@@ -150,14 +77,13 @@ export class EntradaSaidaController {
           WHERE 
             cab.date_added BETWEEN '${inicio} 00:00' AND '${final} 23:59'
             AND cab.order_status_id = 19
-            ${whereFiltro}
         `;
 
         const productOrders = await db.query(query, {
           type: Sequelize.QueryTypes.SELECT,
         })
 
-        const orders = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 0`, {
+        const skill_cab_vendas = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 0`, {
           type: Sequelize.QueryTypes.SELECT,
         })
 
@@ -169,7 +95,7 @@ export class EntradaSaidaController {
 
         for (var item of productOrders) {
 
-          const cab_venda = _.filter(orders, (item2) => item2.numero == item.trans_cab && item2.data == dayjs(item.dataped).format('YYYY-MM-DD') && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
+          const cab_venda = _.filter(skill_cab_vendas, (item2) => item2.numero == item.trans_cab && dayjs(item2.data).format('YYYY-MM-DD') == dayjs(item.dataped).format('YYYY-MM-DD') && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
           
           if (_.size(cab_venda) > 0) {
 
@@ -187,15 +113,6 @@ export class EntradaSaidaController {
 
         items = _.filter(items, (item) => item.status?.toUpperCase()?.includes('CONFIR'))
 
-        /*
-        if (filter?.apenasMercadoLivre) {
-          items = _.filter(items, (item) => item.parc?.parceiro?.toUpperCase()?.includes('MERCADO LIBRE'))
-        }
-        else {
-          items = _.filter(items, (item) => item.parc?.parceiro?.toUpperCase()?.includes(filter?.parceiro) && !item.parc?.parceiro?.toUpperCase()?.includes('MERCADO LIBRE'))
-        }
-        */
-        
         res.status(200).json({
           request: {
             inicio, final, empresa, limit, offset

@@ -3,15 +3,10 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from "url"
 
-import { ProdutoRoute } from './src/routes/cadastros/produto.route.js'
-import { UnidadeRoute } from './src/routes/cadastros/unidade.route.js'
-import { LocalRoute } from './src/routes/cadastros/local.route.js'
-import { TipoEntSaiRoute } from './src/routes/cadastros/tipoEntSai.route.js'
-import { ParceiroRoute } from './src/routes/cadastros/parceiro.route.js'
-import { EntradaSaidaRoute } from './src/routes/cadastros/entradaSaida.route.js'
+import { Passo1Route } from './src/routes/cadastros/passo-1.route.js'
+import { Passo2Route } from './src/routes/cadastros/passo-2.route.js'
+
 import { SearchRoute } from './src/routes/search.js'
-import { RelatorioProdutoRoute } from './src/routes/relatorios/produto.route.js'
-import { RelatorioLocalRoute } from './src/routes/relatorios/local.route.js'
 
 export class App {
 
@@ -30,6 +25,9 @@ export class App {
       exposedHeaders: ['Last-Acess', 'Expire-In'],
     }
 
+    this.express.use(express.json({ limit: '50mb' })); // Aumenta o limite do JSON
+    this.express.use(express.urlencoded({ limit: '50mb', extended: true })); // Aumenta o limite para form-data
+
     this.express.use(cors(corsOptions))
     this.express.use(express.json())
 
@@ -40,17 +38,8 @@ export class App {
     //this.express.use('/api/login', new LoginRoute().router)
 
     //Cadastros
-    this.express.use('/api/entrada-saida', new EntradaSaidaRoute().router)
-
-    this.express.use('/api/cadastros/produto', new ProdutoRoute().router)
-    this.express.use('/api/cadastros/unidade', new UnidadeRoute().router)
-    this.express.use('/api/cadastros/local', new LocalRoute().router)
-    this.express.use('/api/cadastros/tipos-entrada-saida', new TipoEntSaiRoute().router)
-    this.express.use('/api/cadastros/parceiro', new ParceiroRoute().router)
-
-    //Relatorios
-    this.express.use('/api/relatorios/produto', new RelatorioProdutoRoute().router)
-    this.express.use('/api/relatorios/local', new RelatorioLocalRoute().router)
+    this.express.use('/api/passo-1', new Passo1Route().router)
+    this.express.use('/api/passo-2', new Passo2Route().router)
 
     this.express.use('/api/search', new SearchRoute().router)
 

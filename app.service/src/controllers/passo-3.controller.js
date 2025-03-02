@@ -17,7 +17,7 @@ import { Exception } from "../utils/exception.js"
 import sql from 'mssql'
 import { AppContext2 } from "../database2/index.js"
 
-export class Passo2Controller {
+export class Passo3Controller {
 
   lista = async (req, res) => {
     //await Authorization.verify(req, res).then(async ({company}) => {
@@ -32,64 +32,40 @@ export class Passo2Controller {
         const offset = req.body.offset || 0
 
         const query = `
-          SELECT 
-            st.name AS status,
-            cab.date_added AS dataped,
-            det.order_product_id AS trans_det,
-            det.order_id AS trans_cab,
-            cab.customer_id,
-            det.product_id AS codprod,
-            op1.product_option_value_id AS codprod1,
-            CONVERT(det.name, VARCHAR(100)) AS descri1,
-            det.model AS modelo,
-            CONVERT(op2.codigo_de_barra, VARCHAR(16)) AS codbarra,
-            CONVERT(ds.name, VARCHAR(100)) AS descricao,
-            op2.option_id,
-            op2.option_value_id,
-            dstam.name AS tamanho,
-            det.quantity AS qtde,
-            det.price AS precounit,
-            det.total AS total_item,
-            cab.total AS total_venda,
-            cab.custom_field AS cpf,
-            CONVERT(cab.payment_custom_field, VARCHAR(50)) AS compl,
-            tt.value AS frete,
-            'S' AS separado,
-            '     ' AS estoq,
-            cab.payment_firstname AS nome1,
-            cab.payment_lastname AS nome2,
-            cab.payment_address_1 AS endereco,
-            cab.payment_address_2 AS bairro,
-            cab.payment_city AS cidade,
-            cab.payment_zone AS uf,
-            cab.payment_postcode AS cep,
-            cab.order_status_id AS status1,
-            cab.email,
-            cab.telephone AS fone
-          FROM oc_order_product det
-          LEFT JOIN oc_order cab ON cab.order_id = det.order_id
-          LEFT JOIN oc_order_option op1 ON op1.order_id = det.order_id AND op1.order_product_id = det.order_product_id
-          LEFT JOIN oc_product_option_value op2 ON op2.product_id = det.product_id AND op2.product_option_value_id = op1.product_option_value_id
-          LEFT JOIN oc_order_status st ON st.order_status_id = cab.order_status_id
-          LEFT JOIN oc_order_total tt ON tt.order_id = cab.order_id AND tt.code = 'shipping'
-          LEFT JOIN oc_product_description ds ON ds.product_id = det.product_id
-          LEFT JOIN oc_option_value_description dstam ON dstam.option_id = op2.option_id AND dstam.option_value_id = op2.option_value_id
-          WHERE 
-            cab.date_added BETWEEN '${inicio} 00:00' AND '${final} 23:59'
-            AND cab.order_status_id = 19
-        `;
+          select st.name status,cab.date_added dataped,det.order_product_id trans_det,det.order_id trans_cab,cab.customer_id,
+		      det.product_id codprod,op1.product_option_value_id codprod1,convert(det.name,varchar(100)) descri1,det.model modelo,
+          convert(op2.codigo_de_barra,varchar(16)) codbarra,convert(ds.name,varchar(100)) descricao,op2.option_id,op2.option_value_id,dstam.name tamanho,
+          det.quantity qtde,det.price precounit,det.total total_item,cab.total total_venda,cab.custom_field cpf,00 codloja,
+          convert(cab.payment_custom_field,varchar(50)) compl,tt.value frete,'S' separado,Space(20) codcaixa,pd.sku,Space(50) observacao,
+          cab.payment_firstname nome1,cab.payment_lastname nome2,cab.payment_address_1 endereco,cab.payment_address_2 bairro,
+          cab.payment_city cidade,cab.payment_zone uf,cab.payment_postcode cep,cab.order_status_id status_id,cab.email,cab.telephone fone
+          from oc_order_product det,
+          oc_order cab, oc_order_option op1, oc_product_option_value op2, oc_order_status st, oc_order_total tt, oc_product_description ds,
+          oc_option_value_description dstam, oc_product pd
+          where cab.order_id = det.order_id and op1.order_id = det.order_id and op1.order_product_id = det.order_product_id and
+          op2.product_id = det.product_id and op2.product_option_value_id = op1.product_option_value_id and
+          ds.product_id = det.product_id and dstam.option_id = op2.option_id and dstam.option_value_id = op2.option_value_id and
+          st.order_status_id = cab.order_status_id and tt.order_id = cab.order_id and tt.code = 'shipping' and
+          pd.product_id = det.product_id and
+          cab.date_added BETWEEN '${inicio} 00:00' AND '${final} 23:59' and cab.order_status_id in (19,21)
+        `
 
         const productOrders = await db.query(query, {
           type: Sequelize.QueryTypes.SELECT,
         })
 
-        const skill_cab_vendas = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 0`, {
+        const skill_cab_vendas = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 1 AND gerouxml = 0`, {
           type: Sequelize.QueryTypes.SELECT,
         })
 
         const parceiro = await db2.query(`SELECT * FROM skill_cab_parceiro`, {
           type: Sequelize.QueryTypes.SELECT,
         })
+
+        const empresas = await db2.query(`
+          SELECT loj_id codloja, UPPER(CONVERT(loj_nome,char(40))) empresa FROM lojas order by loj_id`,
+          {type: Sequelize.QueryTypes.SELECT}
+        )
 
         let items = []
 
@@ -103,15 +79,17 @@ export class Passo2Controller {
               continue
             }
 
-            const parc = _.filter(parceiro, (parc) => parc.email == item.email?.split("@")[1])
+            const parc = _.filter(parceiro, (parc) => parc.email == item.email?.split("@")[1])[0]
 
-            items.push({...item, parc: parc[0], codloja: cab_venda[0]?.codloja})
+            const fat = _.filter(empresas, (parc) => parc.codloja == cab_venda[0].codloja)[0]
+
+            items.push({...item, parc: parc, fat, codloja: cab_venda[0]?.codloja})
 
           }
 
         }
 
-        items = _.filter(items, (item) => item.status?.toUpperCase()?.includes('CONFIR'))
+        items = _.filter(items, (item) => item?.status?.toUpperCase()?.includes('CONFIR'))
 
         res.status(200).json({
           request: {

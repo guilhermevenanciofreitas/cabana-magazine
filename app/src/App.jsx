@@ -10,8 +10,11 @@ import { appNavs } from './config';
 import { BrowserRouter } from 'react-router-dom';
 
 
-import { EntradaSaida1 } from './views/passo-1/index.entrada-saida';
-import { EntradaSaida } from './views/passo-2/index.entrada-saida';
+import { Passo1 } from './views/passo-1/index.entrada-saida';
+import { Passo2 } from './views/passo-2/index.entrada-saida';
+import { Passo3 } from './views/passo-3/index.entrada-saida';
+import { Passo4 } from './views/passo-4/index.entrada-saida';
+import { Passo5 } from './views/passo-5/index.entrada-saida';
 
 import ptBR from 'rsuite/locales/pt_BR';
 import { IntlProvider } from 'react-intl';
@@ -57,10 +60,13 @@ const App = () => {
 
             <Route path="/" element={<Frame navs={appNavs} />}>
 
-              <Route index element={<EntradaSaida1 />} />
+              <Route index element={<Passo1 />} />
 
-              <Route path="passo-1" element={<EntradaSaida1 />} />
-              <Route path="passo-2" element={<EntradaSaida />} />
+              <Route path="passo-1" element={<Passo1 />} />
+              <Route path="passo-2" element={<Passo2 />} />
+              <Route path="passo-3" element={<Passo3 />} />
+              <Route path="passo-4" element={<Passo4 />} />
+              <Route path="passo-5" element={<Passo5 />} />
 
             </Route>
             

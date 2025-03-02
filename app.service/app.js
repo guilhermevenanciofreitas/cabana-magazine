@@ -3,10 +3,13 @@ import cors from 'cors'
 import path from 'path'
 import { fileURLToPath } from "url"
 
-import { Passo1Route } from './src/routes/cadastros/passo-1.route.js'
-import { Passo2Route } from './src/routes/cadastros/passo-2.route.js'
+import { Passo1Route } from './src/routes/passo-1.route.js'
+import { Passo2Route } from './src/routes/passo-2.route.js'
 
 import { SearchRoute } from './src/routes/search.js'
+import { Passo3Route } from './src/routes/passo-3.route.js'
+import { Passo4Route } from './src/routes/passo-4.route.js'
+import { Passo5Route } from './src/routes/passo-5.route.js'
 
 export class App {
 
@@ -40,6 +43,9 @@ export class App {
     //Cadastros
     this.express.use('/api/passo-1', new Passo1Route().router)
     this.express.use('/api/passo-2', new Passo2Route().router)
+    this.express.use('/api/passo-3', new Passo3Route().router)
+    this.express.use('/api/passo-4', new Passo4Route().router)
+    this.express.use('/api/passo-5', new Passo5Route().router)
 
     this.express.use('/api/search', new SearchRoute().router)
 

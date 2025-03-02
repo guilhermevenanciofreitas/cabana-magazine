@@ -14,8 +14,6 @@ import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
 import { Loading } from '../../App'
 
-import { ViewEntradaSaida } from '../passo-2/view.entrada-saida'
-
 const options = [
   { label: "Parceiro", value: "parceiro" },
   { label: "Cliente", value: "cliente" },
@@ -60,10 +58,8 @@ function ComboBoxWithInput({ onFilterChange }) {
 }
 
 
-export class Passo2 extends React.Component {
+export class Passo3 extends React.Component {
 
-  ViewEntradaSaida = React.createRef()
-  
   state = {
     request: {
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
@@ -98,7 +94,7 @@ export class Passo2 extends React.Component {
         }
 
         this.setState({loading: true})
-        let result = await new Service().Post('passo-2/lista', this.state.request)
+        let result = await new Service().Post('passo-3/lista', this.state.request)
         result.data.response['rows2'] = result.data.response['rows']
         this.setState({...result.data }, () => this.filtrar())
         
@@ -145,24 +141,8 @@ export class Passo2 extends React.Component {
     
   }
 
-  onEditar = async (row) => {
-
-    const item = await this.ViewEntradaSaida.current.editar(row)
-
-    if (item) {
-
-      const rows = this.state.response.rows.map(item => item.trans_cab === row.trans_cab ? { ...item, checked: true } : item)
-
-      this.setState({response: {...this.state.response, rows}}, async () => {
-        this.onAlteraRegistro(item, item.codcaixa, item.obs)
-      })
-
-    }
-
-  }
-
-  onAlteraRegistro = (row, codcaixa, obs) => {
-    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab ? { ...item, codcaixa, obs } : item)
+  onAlteraRegistro = (row) => {
+    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab ? { ...item } : item)
     this.setState({response: {...this.state.response, rows2}})
   }
 
@@ -172,15 +152,7 @@ export class Passo2 extends React.Component {
 
     this.setState({response: {...this.state.response, rows2}}, async () => {
       
-      let codcaixa, obs = ''
-
-      if (checked) {
-        const item = await this.onEditar(row)
-        codcaixa = item.codcaixa || ''
-        obs = item.obs || ''
-      }
-
-      this.onAlteraRegistro(row, codcaixa, obs)
+      this.onAlteraRegistro(row)
 
     })
 
@@ -193,7 +165,7 @@ export class Passo2 extends React.Component {
 
       this.setState({submting: true})
 
-      await new Service().Post('passo-2/salvar', _.map(selecteds, (item) => {
+      await new Service().Post('passo-3/salvar', _.map(selecteds, (item) => {
         return {
           numero: item.trans_cab,
           codprod: item.codprod,
@@ -226,19 +198,21 @@ export class Passo2 extends React.Component {
     { selector: (row) => row.descricao, name: 'Descrição'},
     { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
-    { selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
-    { selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
-    { selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '110px', maxWidth: '110px'},
-    { selector: (row) => row.obs, name: 'Obs', minWidth: '150px', maxWidth: '150px'},
-    { selector: (row) => row.estoq, name: 'Gaveta', minWidth: '50px', maxWidth: '50px'},
+
+    { selector: (row) => row.fat?.codloja, name: 'Cód.', minWidth: '40px', maxWidth: '40px'},
+    { selector: (row) => row.fat?.empresa, name: 'Empresa a faturar', minWidth: '250px', maxWidth: '250px'},
+
+    //{ selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
+    //{ selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
+    //{ selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '110px', maxWidth: '110px'},
+    //{ selector: (row) => row.obs, name: 'Obs', minWidth: '150px', maxWidth: '150px'},
+    //{ selector: (row) => row.estoq, name: 'Gaveta', minWidth: '50px', maxWidth: '50px'},
   ]
 
   render = () => {
 
     return (
-      <Panel header={<CustomBreadcrumb title={'Separação'} />}>
-
-        <ViewEntradaSaida ref={this.ViewEntradaSaida} />
+      <Panel header={<CustomBreadcrumb title={'Gerar XML'} />}>
 
         <PageContent>
           
@@ -285,13 +259,13 @@ export class Passo2 extends React.Component {
             })}
           </Nav>
 
-          <DataTable height={'calc(100vh - 400px)'} noDataComponent={''} columns={this.columns} rows={this.state?.response?.rows2} loading={this.state?.loading} onItem={(row) => this.onEditar(row)} />
+          <DataTable height={'calc(100vh - 400px)'} noDataComponent={''} columns={this.columns} rows={this.state?.response?.rows2} loading={this.state?.loading} />
       
           <hr></hr>
           
           <Stack direction='row' alignItems='flexStart' justifyContent='space-between'>
             <Stack spacing={5}>
-              <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Salvando...</> : <><FaCheckCircle /> &nbsp; Salvar marcados</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Gerando pedidos...</> : <><FaCheckCircle /> &nbsp; Gerar pedidos</>}</Button>
             </Stack>
           </Stack>
           

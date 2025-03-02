@@ -16,71 +16,25 @@ export const appNavs = [
   {
     eventKey: 'passo-2',
     icon: <Icon as={MdDashboard} />,
-    title: 'Separado',
+    title: 'Separação',
     to: '/passo-2'
   },
-  /*
   {
-    eventKey: 'cadastros',
-    title: 'Cadastros',
-    icon: <Icon as={FaTruck} />,
-    children: [
-      {
-        eventKey: 'produtos',
-        title: 'Produtos',
-        to: '/cadastros/produtos'
-      },
-      {
-        eventKey: 'unidades',
-        title: 'Unidade',
-        to: '/cadastros/unidades'
-      },
-      {
-        eventKey: 'locais',
-        title: 'Local',
-        to: '/cadastros/locais'
-      },
-      {
-        eventKey: 'tipoEntSai',
-        title: 'Tipo de Entrada/Saída',
-        to: '/cadastros/tipos-entrada-saida'
-      },
-      {
-        eventKey: 'parceiros',
-        title: 'Parceiros',
-        to: '/cadastros/parceiros'
-      },
-    ]
+    eventKey: 'passo-3',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Gerar XML',
+    to: '/passo-3'
   },
   {
-    eventKey: 'relatorios',
-    title: 'Relatórios',
-    icon: <Icon as={FaArchive} />,
-    children: [
-      {
-        eventKey: 'relatorios-produto',
-        title: 'Produtos',
-        to: '/relatorios/produto'
-      },
-      {
-        eventKey: 'relatorios-local',
-        title: 'Locais',
-        to: '/relatorios/local'
-      },
-    ]
-  },*/
-  /*
-  {
-    eventKey: 'tasks',
-    icon: <Icon as={FaTasks} />,
-    title: 'Tarefas',
-    to: '/tasks'
+    eventKey: 'passo-4',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Expedição',
+    to: '/passo-4'
   },
   {
-    eventKey: 'integrations',
-    icon: <Icon as={FaInfoCircle} />,
-    title: 'Integrações',
-    to: '/integrations'
+    eventKey: 'passo-5',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Enviados',
+    to: '/passo-5'
   },
-  */
-];
+]

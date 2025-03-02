@@ -184,23 +184,26 @@ export class Passo1Controller {
   }
 
   relatorio = async (req, res) => {
-    try {
+    //await Authorization.verify(req, res).then(async () => {
+      try {
 
-      const report = await Report.generate({
-        report: 'relacao-produtos.html',
-        company: req.body.items[0].fat?.empresa,
-        title: 'Relatório de produtos',
-        data: {
-          items: req.body.items
-        }
-      })
+        const report = await Report.generate({
+          report: 'relacao-produtos.html',
+          company: req.body.items[0].fat?.empresa,
+          title: 'Relatório de produtos',
+          data: {
+            items: req.body.items
+          }
+        })
 
-      res.status(200).json({pdf: report})
+        res.status(200).json({pdf: report})
 
-    } catch (error) {
-      Exception.error(res, error)
-    }
-    
+      } catch (error) {
+        Exception.error(res, error)
+      }
+    //}).catch((error) => {
+    //  res.status(400).json({message: error.message})
+    //})
   }
 
   salvar = async (req, res) => {
@@ -214,16 +217,20 @@ export class Passo1Controller {
           const cab_venda = await db.query(`SELECT numero FROM skill_cab_vendas WHERE data BETWEEN '${req.body.inicio}' AND '${req.body.final}'`, {type: Sequelize.QueryTypes.SELECT, transaction})
 
           for (const item of req.body.items) {
+
+            //if (item.trans_cab != 408219) {
+            //  continue
+            //}
   
             if (_.size(_.filter(cab_venda, (venda) => venda.numero == item.trans_cab && venda.data == item.dataped)) == 0) {
   
               const sqlInsert = `
                 INSERT INTO skill_cab_vendas (numero, data, codprod, codprod1, codloja) VALUES (${item.trans_cab}, '${dayjs(item.dataped).format('YYYY-MM-DD')}', ${item.codprod}, ${item.codprod1}, ${item.fat?.codloja});
-                `
+              `
   
               const sqlUpdate = `
                 UPDATE produto_pendente SET prod_pen_loja_id_saida = '${item.fat?.codloja}' WHERE prod_pen_id_pedido = '${item.trans_cab}' AND prod_pen_codigo_de_barras = '${item.codbarra}';
-                `
+              `
   
               await db.query(sqlInsert, {type: Sequelize.QueryTypes.INSERT, transaction})
               await db.query(sqlUpdate, {type: Sequelize.QueryTypes.UPDATE, transaction})

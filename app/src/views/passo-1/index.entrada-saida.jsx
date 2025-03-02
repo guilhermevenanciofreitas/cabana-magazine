@@ -85,7 +85,7 @@ function ComboBoxWithInput({ onFilterChange }) {
 }
 
 
-export class EntradaSaida1 extends React.Component {
+export class Passo1 extends React.Component {
 
   ReportViewer = React.createRef()
 
@@ -288,8 +288,6 @@ export class EntradaSaida1 extends React.Component {
             })}
           </Nav>
 
-          {/*<DataTable height={'calc(100vh - 400px)'} noDataComponent={''} columns={this.columns} rows={this.state?.response?.rows2} loading={this.state?.loading} onItem={(row) => this.onEditar(row)} />*/}
-      
           <div style={{cursor: 'pointer', width: '100%', marginTop: '15px', maxHeight: '100%', height: 'calc(100vh - 400px)', overflow: this.state?.loading ? 'hidden' : 'auto'}}>
 
             {this.state?.loading && <div><Placeholder.Grid rows={30} columns={8} active /></div>}

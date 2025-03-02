@@ -189,24 +189,22 @@ export class Passo4 extends React.Component {
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
     { selector: (row) => row.trans_cab, name: 'Número', center: true, minWidth: '80px', maxWidth: '80px'},
-    { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
     { selector: (row) => dayjs(row.dataped).format('DD/MM/YYYY'), name: 'Data', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => dayjs(row.dataped).format('HH:mm'), name: 'Hora', center: true, minWidth: '60px', maxWidth: '60px'},
-    { selector: (row) => `${row.nome1} ${row.nome2}`, name: 'Cliente', maxWidth: '250px'},
+    { selector: (row) => `${row.nome1} ${row.nome2}`, name: 'Cliente', minWidth: '150px', maxWidth: '150px'},
     { selector: (row) => row.codprod, name: 'Cód. prod', center: true,  minWidth: '75px', maxWidth: '75px'},
     { selector: (row) => row.codbarra, name: 'Cod. barras', center: true, minWidth: '130px', maxWidth: '130px'},
     { selector: (row) => row.descricao, name: 'Descrição'},
     { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
-
-    { selector: (row) => row.fat?.codloja, name: 'Cód.', minWidth: '40px', maxWidth: '40px'},
-    { selector: (row) => row.fat?.empresa, name: 'Empresa a faturar', minWidth: '250px', maxWidth: '250px'},
-
-    //{ selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
-    //{ selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
-    //{ selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '110px', maxWidth: '110px'},
-    //{ selector: (row) => row.obs, name: 'Obs', minWidth: '150px', maxWidth: '150px'},
-    //{ selector: (row) => row.estoq, name: 'Gaveta', minWidth: '50px', maxWidth: '50px'},
+    { selector: (row) => '', name: 'Imp.Etiq', minWidth: '100px', maxWidth: '100px'},
+    { selector: (row) => '', name: 'Imp.Danfe', minWidth: '100px', maxWidth: '100px'},
+    { selector: (row) => row.codloja, name: 'Loja', minWidth: '55px', maxWidth: '55px'},
+    { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
+    { selector: (row) => row.precounit, name: 'Preço Unit.', minWidth: '80px', maxWidth: '80px'},
+    { selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
+    { selector: (row) => '', name: 'Caminho etiq.', minWidth: '100px', maxWidth: '100px'},
+    { selector: (row) => '', name: 'Caminho danfe.', minWidth: '100px', maxWidth: '100px'},
   ]
 
   render = () => {
@@ -265,7 +263,7 @@ export class Passo4 extends React.Component {
           
           <Stack direction='row' alignItems='flexStart' justifyContent='space-between'>
             <Stack spacing={5}>
-              <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Gerando pedidos...</> : <><FaCheckCircle /> &nbsp; Gerar pedidos</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Salvando...</> : <><FaCheckCircle /> &nbsp; Salvar</>}</Button>
             </Stack>
           </Stack>
           

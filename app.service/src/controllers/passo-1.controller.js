@@ -158,7 +158,7 @@ export class Passo1Controller {
             }
           }
 
-          let fat = _.filter(empresas, (parc) => parc.codloja == codloja)[0]
+          const fat = _.filter(empresas, (parc) => parc.codloja == codloja)[0]
 
           items.push({...item, parc: parc, fat, items: _.filter(productOrders, (item2) => item2.trans_cab == item.trans_cab)})
 

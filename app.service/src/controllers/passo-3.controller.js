@@ -85,7 +85,7 @@ export class Passo3Controller {
 
             const fat = _.filter(empresas, (parc) => parc.codloja == cab_venda[0].codloja)[0]
 
-            items.push({...item, parc: parc, fat, codloja: cab_venda[0]?.codloja, codcaixa: cab_venda[0]?.codcaixa})
+            items.push({...item, parc: parc, fat, codloja: cab_venda[0]?.codloja, codcaixa: cab_venda[0]?.codcaixa, items: _.filter(productOrders, (item2) => item2.trans_cab == item.trans_cab)})
 
           }
 
@@ -114,33 +114,45 @@ export class Passo3Controller {
     //await Authorization.verify(req, res).then(async () => {
       try {
 
-        const db = new AppContext2()
-  
-        await db.transaction(async (transaction) => {
+        //Arquivo XML
+        const workBook = xlsx.utils.book_new();
+        const workSheet = xlsx.utils.json_to_sheet(req.body.dataExcel)
+        xlsx.utils.book_append_sheet(workBook, workSheet, "Items")
+        const excel = xlsx.write(workBook, { type: "base64" })
 
-          for (const item of req.body) {
+        let conteudo = ''
 
-            const { numero, codprod, codprod1 } = item
-  
-            
-    
+        for (const venda of req.body.dataTxt) {
+
+          const trans_cab = venda.trans_cab
+          const empresa = venda.fat.empresa
+          const empresaCnpj = ''
+          const cpfCnpj = JSON.parse(venda.cpf)['3']
+          const cpfCnpjTipo = _.size(cpfCnpj) < 14 ? 'F' : 'J'
+          const nome = venda.nome1 + ' ' + venda.nome2
+          const rg = ''
+          const email = venda.email
+          const fone = venda.fone
+          const endereco = venda.endereco
+          const numero = JSON.parse(venda.compl)['1']
+          const compl = JSON.parse(venda.compl)['2']
+          const bairro = venda.bairro
+          const forma_pagamento = ''
+          const cep = venda.cep
+          const frete = parseFloat(venda.frete || 0)
+          const viaCEP = await this.consultarCEP(cep)
+
+          conteudo += `P|${trans_cab}|${empresa}|${empresaCnpj}|${cpfCnpj}|${cpfCnpjTipo}|${nome}|${rg}|${email}|${fone}|${endereco}|${numero}|${compl}|${bairro}|${viaCEP.ibge}|${forma_pagamento}|${cep}|${frete.toFixed(2)}|\n`
+
+          for (const item of venda.items) {
+            conteudo += `I|${item.codprod}|${item.codbarra}|${item.descricao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9\s-]/g, "")}|${item.qtde}|${parseFloat(item.precounit).toFixed(2)}|${parseFloat(item.total_item).toFixed(2)}|`
           }
 
-          // Criar uma nova planilha do Excel
-          const workBook = xlsx.utils.book_new();
-          const workSheet = xlsx.utils.json_to_sheet(req.body);
+        }
 
-          // Adicionar a planilha ao workbook
-          xlsx.utils.book_append_sheet(workBook, workSheet, "Items");
-
-          // Gerar o arquivo em Base64
-          const excel = xlsx.write(workBook, { type: "base64" });
-          
-          res.status(200).json({excel})
-
-        })
-
-        //res.status(200).json({})
+        const txt = Buffer.from(conteudo, 'utf8').toString('base64')
+        
+        res.status(200).json({xlsx: excel, txt})
 
       } catch (error) {
         Exception.error(res, error)
@@ -148,6 +160,33 @@ export class Passo3Controller {
     //}).catch((error) => {
     //  res.status(400).json({message: error.message})
     //})
+  }
+
+  consultarCEP = async (cep) => {
+    try {
+      
+        cep = cep.replace(/\D/g, "");
+
+        if (cep.length !== 8) {
+            throw new Error("CEP inválido! Insira um CEP com 8 dígitos.");
+        }
+
+        const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+        
+        if (!response.ok) {
+            throw new Error("Erro ao consultar o CEP.");
+        }
+
+        const dados = await response.json();
+
+        if (dados.erro) {
+            return ''
+        }
+
+        return dados; // Retorna o objeto com os dados do endereço
+    } catch (error) {
+        return ''
+    }
   }
 
 }

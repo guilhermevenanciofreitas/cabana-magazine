@@ -163,18 +163,21 @@ export class Passo3 extends React.Component {
 
       this.setState({ submting: true });
 
-      const response = await new Service().Post('passo-3/salvar', _.map(selecteds, (row) => (
-        {
-          'Pedido': `${row.trans_cab}`,
-          'Nome': `${row.nome1} ${row.nome2}`,
-          'Codigo_Caixa': row.codcaixa,
-          'Empresa1': row.fat?.empresa,
-          'Marketplace': row.parc?.parceiro,
-          'Cod_Fatu': '   '
-        }
-      )))
+      const response = await new Service().Post('passo-3/salvar', {
+        dataExcel: _.map(selecteds, (row) => ({
+            'Pedido': `${row.trans_cab}`,
+            'Nome': `${row.nome1} ${row.nome2}`,
+            'Codigo_Caixa': row.codcaixa,
+            'Empresa1': row.fat?.empresa,
+            'Marketplace': row.parc?.parceiro,
+            'Cod_Fatu': '   '
+        })),
+        dataTxt: selecteds
+      })
 
-      await Archive.saveAs(response.data.excel, 'arquivo.xlsx')
+      await Archive.saveAs(response.data.xlsx, 'arquivo.xlsx')
+
+      await Archive.saveAs(response.data.txt, 'arquivo.txt')
 
     } catch (error) {
       Exception.error(error);
@@ -182,46 +185,6 @@ export class Passo3 extends React.Component {
       this.setState({ submting: false });
     }
   }
-
-  saveFile = async (base64Data) => {
-
-    const base64ToBinary = (base64) => {
-      const binaryString = window.atob(base64);  // Decodifica o Base64 para uma string binária
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-
-      return bytes;
-    };
-
-    //const excelData = base64ToBinary(base64Data);
-
-    try {
-      // A chamada para o showSaveFilePicker agora está sendo feita dentro de um evento de clique
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: "meuarquivo.txt",
-        types: [
-          {
-            description: "Texto",
-            accept: { "text/plain": [".txt"] },
-          },
-        ],
-      });
-
-      const writableStream = await fileHandle.createWritable();
-      await writableStream.write("Exemplo de conteúdo!");
-      await writableStream.close();
-
-      console.log("Arquivo salvo com sucesso!");
-    } catch (error) {
-      console.error("Erro ao salvar o arquivo:", error);
-    }
-
-  }
-
 
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},

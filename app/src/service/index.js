@@ -51,6 +51,7 @@ export class Service {
             //Sessão expirada
             if (error?.response?.status == 400) {
                 const message = error.response.data.message
+                //Swal.fire({showCloseButton: true, title: 'Ops...', icon: 'warning', text: message, confirmButtonColor: "#FFF", confirmButtonText: 'Login'})
                 localStorage.removeItem('Authorization')
                 //const to = window.location.hash.slice(1)
                 //window.location.href = `/sign-in`

@@ -122,46 +122,59 @@ export class Passo3Controller {
 
         let conteudo = ''
 
-        for (const venda of req.body.dataTxt) {
+        const db = new AppContext2()
 
-          let empresaCnpj = ''
+        await db.transaction(async (transaction) => {
 
-          if (venda.fat.codloja == 1) {
-            empresaCnpj = '29687063000140'
+          for (const venda of req.body.dataTxt) {
+
+            let empresaCnpj = ''
+
+            if (venda.fat.codloja == 1) {
+              empresaCnpj = '29687063000140'
+            }
+
+            if (venda.fat.codloja == 8) {
+              empresaCnpj = '18452994000142'
+            }
+
+            if (venda.fat.codloja == 10) {
+              empresaCnpj = '34127874000126'
+            }
+
+            const trans_cab = venda.trans_cab
+            const empresa = venda.fat.empresa
+            const cpfCnpj = JSON.parse(venda.cpf)['3']
+            const cpfCnpjTipo = _.size(cpfCnpj) < 14 ? 'F' : 'J'
+            const nome = venda.nome1 + ' ' + venda.nome2
+            const rg = ''
+            const email = venda.email
+            const fone = venda.fone
+            const endereco = venda.endereco
+            const numero = JSON.parse(venda.compl)['1']
+            const compl = JSON.parse(venda.compl)['2']
+            const bairro = venda.bairro
+            const forma_pagamento = ''
+            const cep = venda.cep
+            const frete = parseFloat(venda.frete || 0)
+            const viaCEP = await this.consultarCEP(cep)
+
+            conteudo += `P|${trans_cab}|${empresa}|${empresaCnpj}|${cpfCnpj}|${cpfCnpjTipo}|${nome}|${rg}|${email}|${fone}|${endereco}|${numero}|${compl}|${bairro}|${viaCEP.ibge}|${forma_pagamento}|${cep}|${frete.toFixed(2)}|\n`
+
+            for (const item of venda.items) {
+
+              conteudo += `I|${item.codprod}|${item.codbarra}|${item.descricao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9\s-]/g, "")}|${item.qtde}|${parseFloat(item.precounit).toFixed(2)}|${parseFloat(item.total_item).toFixed(2)}|`
+            
+              await db.query(`UPDATE skill_cab_vendas SET gerouxml = 1, dtxml = NOW() WHERE numero = ${item.trans_cab} and codprod = ${item.codprod} and codprod1 = ${item.codprod1}`, {
+                type: Sequelize.QueryTypes.UPDATE,
+                transaction
+              })
+
+            }
+
           }
 
-          if (venda.fat.codloja == 8) {
-            empresaCnpj = '18452994000142'
-          }
-
-          if (venda.fat.codloja == 10) {
-            empresaCnpj = '34127874000126'
-          }
-
-          const trans_cab = venda.trans_cab
-          const empresa = venda.fat.empresa
-          const cpfCnpj = JSON.parse(venda.cpf)['3']
-          const cpfCnpjTipo = _.size(cpfCnpj) < 14 ? 'F' : 'J'
-          const nome = venda.nome1 + ' ' + venda.nome2
-          const rg = ''
-          const email = venda.email
-          const fone = venda.fone
-          const endereco = venda.endereco
-          const numero = JSON.parse(venda.compl)['1']
-          const compl = JSON.parse(venda.compl)['2']
-          const bairro = venda.bairro
-          const forma_pagamento = ''
-          const cep = venda.cep
-          const frete = parseFloat(venda.frete || 0)
-          const viaCEP = await this.consultarCEP(cep)
-
-          conteudo += `P|${trans_cab}|${empresa}|${empresaCnpj}|${cpfCnpj}|${cpfCnpjTipo}|${nome}|${rg}|${email}|${fone}|${endereco}|${numero}|${compl}|${bairro}|${viaCEP.ibge}|${forma_pagamento}|${cep}|${frete.toFixed(2)}|\n`
-
-          for (const item of venda.items) {
-            conteudo += `I|${item.codprod}|${item.codbarra}|${item.descricao.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9\s-]/g, "")}|${item.qtde}|${parseFloat(item.precounit).toFixed(2)}|${parseFloat(item.total_item).toFixed(2)}|`
-          }
-
-        }
+        })
 
         const txt = Buffer.from(conteudo, 'utf8').toString('base64')
         

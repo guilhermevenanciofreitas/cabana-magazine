@@ -179,6 +179,8 @@ export class Passo3 extends React.Component {
 
       await Archive.saveAs(response.data.txt, 'arquivo.txt')
 
+      await this.onSearch()
+
     } catch (error) {
       Exception.error(error);
     } finally {
@@ -198,15 +200,8 @@ export class Passo3 extends React.Component {
     { selector: (row) => row.descricao, name: 'Descrição'},
     { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
-
     { selector: (row) => row.fat?.codloja, name: 'Cód.', minWidth: '40px', maxWidth: '40px'},
     { selector: (row) => row.fat?.empresa, name: 'Empresa a faturar', minWidth: '250px', maxWidth: '250px'},
-
-    //{ selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
-    //{ selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
-    //{ selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '110px', maxWidth: '110px'},
-    //{ selector: (row) => row.obs, name: 'Obs', minWidth: '150px', maxWidth: '150px'},
-    //{ selector: (row) => row.estoq, name: 'Gaveta', minWidth: '50px', maxWidth: '50px'},
   ]
 
   render = () => {

@@ -124,9 +124,22 @@ export class Passo3Controller {
 
         for (const venda of req.body.dataTxt) {
 
+          let empresaCnpj = ''
+
+          if (venda.fat.codloja == 1) {
+            empresaCnpj = '29687063000140'
+          }
+
+          if (venda.fat.codloja == 8) {
+            empresaCnpj = '18452994000142'
+          }
+
+          if (venda.fat.codloja == 10) {
+            empresaCnpj = '34127874000126'
+          }
+
           const trans_cab = venda.trans_cab
           const empresa = venda.fat.empresa
-          const empresaCnpj = ''
           const cpfCnpj = JSON.parse(venda.cpf)['3']
           const cpfCnpjTipo = _.size(cpfCnpj) < 14 ? 'F' : 'J'
           const nome = venda.nome1 + ' ' + venda.nome2

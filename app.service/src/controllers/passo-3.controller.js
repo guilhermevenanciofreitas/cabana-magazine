@@ -17,6 +17,8 @@ import { Exception } from "../utils/exception.js"
 import sql from 'mssql'
 import { AppContext2 } from "../database2/index.js"
 
+import xlsx from "xlsx";
+
 export class Passo3Controller {
 
   lista = async (req, res) => {
@@ -54,7 +56,7 @@ export class Passo3Controller {
           type: Sequelize.QueryTypes.SELECT,
         })
 
-        const skill_cab_vendas = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 1 AND gerouxml = 0`, {
+        const skill_cab_vendas = await db2.query(`SELECT numero, data, codprod, codprod1, separado, codloja, codcaixa FROM skill_cab_vendas WHERE data BETWEEN '${inicio}' AND '${final}' AND separado = 1 AND gerouxml = 0`, {
           type: Sequelize.QueryTypes.SELECT,
         })
 
@@ -83,7 +85,7 @@ export class Passo3Controller {
 
             const fat = _.filter(empresas, (parc) => parc.codloja == cab_venda[0].codloja)[0]
 
-            items.push({...item, parc: parc, fat, codloja: cab_venda[0]?.codloja})
+            items.push({...item, parc: parc, fat, codloja: cab_venda[0]?.codloja, codcaixa: cab_venda[0]?.codcaixa})
 
           }
 
@@ -118,18 +120,27 @@ export class Passo3Controller {
 
           for (const item of req.body) {
 
-            const { numero, codprod, codprod1, codcaixa, obs } = item
+            const { numero, codprod, codprod1 } = item
   
-            await db.query(`UPDATE skill_cab_vendas SET separado = 1, codcaixa = ${codcaixa ?? 'NULL'}, observacao = '${obs ?? ''}', dtseparado = NOW() WHERE numero = ${numero} and codprod = ${codprod} and codprod1 = ${codprod1}`, {
-              type: Sequelize.QueryTypes.UPDATE,
-              transaction
-            })
+            
     
           }
 
+          // Criar uma nova planilha do Excel
+          const workBook = xlsx.utils.book_new();
+          const workSheet = xlsx.utils.json_to_sheet(req.body);
+
+          // Adicionar a planilha ao workbook
+          xlsx.utils.book_append_sheet(workBook, workSheet, "Items");
+
+          // Gerar o arquivo em Base64
+          const excel = xlsx.write(workBook, { type: "base64" });
+          
+          res.status(200).json({excel})
+
         })
 
-        res.status(200).json({})
+        //res.status(200).json({})
 
       } catch (error) {
         Exception.error(res, error)

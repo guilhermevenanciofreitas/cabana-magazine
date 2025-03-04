@@ -218,9 +218,9 @@ export class Passo1Controller {
 
           for (const item of req.body.items) {
 
-            //if (item.trans_cab != 408219) {
-            //  continue
-            //}
+            if (item.trans_cab != 408661) {
+              continue
+            }
   
             if (_.size(_.filter(cab_venda, (venda) => venda.numero == item.trans_cab && venda.data == item.dataped)) == 0) {
   

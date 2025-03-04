@@ -13,6 +13,7 @@ import _ from 'lodash'
 import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
 import { Loading } from '../../App'
+import { Download } from '../../utils/download'
 
 const options = [
   { label: "Parceiro", value: "parceiro" },
@@ -69,45 +70,42 @@ export class Passo3 extends React.Component {
   }
 
   onSearch = async () => {
-    this.setState({loading: true}, async () => {
-      try {
+    try {
 
-        Loading.Show('Buscando...')
-        
-        const errors = []
+      Loading.Show('Buscando...')
+      
+      const errors = []
 
-        if (_.isEmpty(this.state?.request?.inicio)) {
-          errors.push('Informe a data inicial')
-        }
-
-        if (_.isEmpty(this.state?.request?.final)) {
-          errors.push('Informe a data final')
-        }
-
-        //if (!this.state?.request?.empresa) {
-        //  errors.push('Informe a empresa')
-        //}
-
-        if (_.size(errors) >= 1) {
-          toaster.push(<Message type='warning'><b>Mensagem</b><ul style={{marginTop: '10px'}}>{_.map(errors || [], (message, key) => <li key={key}>{message}</li>)}</ul></Message>,{ placement: 'topEnd', duration: 5000 })
-          return
-        }
-
-        this.setState({loading: true})
-        let result = await new Service().Post('passo-3/lista', this.state.request)
-        result.data.response['rows2'] = result.data.response['rows']
-        this.setState({...result.data }, () => this.filtrar())
-        
-      } catch (error) {
-        Exception.error(error)
-      } finally {
-        Loading.Hide()
-        this.setState({loading: false})
+      if (_.isEmpty(this.state?.request?.inicio)) {
+        errors.push('Informe a data inicial')
       }
-    })
+
+      if (_.isEmpty(this.state?.request?.final)) {
+        errors.push('Informe a data final')
+      }
+
+      //if (!this.state?.request?.empresa) {
+      //  errors.push('Informe a empresa')
+      //}
+
+      if (_.size(errors) >= 1) {
+        toaster.push(<Message type='warning'><b>Mensagem</b><ul style={{marginTop: '10px'}}>{_.map(errors || [], (message, key) => <li key={key}>{message}</li>)}</ul></Message>,{ placement: 'topEnd', duration: 5000 })
+        return
+      }
+
+      this.setState({loading: true})
+      let result = await new Service().Post('passo-3/lista', this.state.request)
+      result.data.response['rows2'] = result.data.response['rows']
+      this.setState({...result.data }, () => this.filtrar())
+      
+    } catch (error) {
+      Exception.error(error)
+    } finally {
+      Loading.Hide()
+      this.setState({loading: false})
+    }
   }
 
-  
   filtrar = (picker, input) => {
 
     let rows2 = _.filter(this.state?.response?.rows, (item) => {
@@ -165,20 +163,48 @@ export class Passo3 extends React.Component {
 
       this.setState({submting: true})
 
-      await new Service().Post('passo-3/salvar', _.map(selecteds, (item) => {
+      const response = await new Service().Post('passo-3/salvar', _.map(selecteds, (row) => {
         return {
-          numero: item.trans_cab,
-          codprod: item.codprod,
-          codprod1: item.codprod1,
-          codcaixa: item.codcaixa,
-          obs: item.obs
+          'Pedido': `${row.trans_cab}`,
+          'Nome': `${row.nome1} ${row.nome2}`,
+          'Codigo_Caixa': row.codcaixa,
+          'Empresa1': row.fat?.empresa,
+          'Marketplace': row.parc?.parceiro,
+          'Cod_Fatu': '   '
         }
       }))
 
+      await this.onSearch()
+      
       await toaster.push(<Message showIcon type='success'>Salvo com sucesso!</Message>, {placement: 'topEnd', duration: 5000 })
       
-      this.onSearch()
+      //Download.file(response.data.excel, 'arquivo.xlsx')
+
       
+      try {
+        // Usuário escolhe onde salvar
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: "meuarquivo.txt",
+          types: [
+            {
+              description: "Texto",
+              accept: { "text/plain": [".txt"] },
+            },
+          ],
+        });
+  
+        console.log(fileHandle)
+    
+        const writableStream = await fileHandle.createWritable();
+        await writableStream.write("Exemplo de conteúdo!");
+        await writableStream.close();
+    
+        console.log("Arquivo salvo com sucesso!");
+      } catch (error) {
+        console.error("Erro ao salvar o arquivo:", error);
+      }
+  
+
     } catch (error) {
       Exception.error(error)
     } finally {

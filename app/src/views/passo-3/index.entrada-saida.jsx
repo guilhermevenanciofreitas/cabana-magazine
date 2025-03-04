@@ -13,7 +13,7 @@ import _ from 'lodash'
 import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
 import { Loading } from '../../App'
-import { Download } from '../../utils/download'
+import { Archive } from '../../utils/archive'
 
 const options = [
   { label: "Parceiro", value: "parceiro" },
@@ -161,10 +161,10 @@ export class Passo3 extends React.Component {
 
       const selecteds = _.filter(this.state?.response?.rows2, (item) => item.checked)
 
-      this.setState({submting: true})
+      this.setState({ submting: true });
 
-      const response = await new Service().Post('passo-3/salvar', _.map(selecteds, (row) => {
-        return {
+      const response = await new Service().Post('passo-3/salvar', _.map(selecteds, (row) => (
+        {
           'Pedido': `${row.trans_cab}`,
           'Nome': `${row.nome1} ${row.nome2}`,
           'Codigo_Caixa': row.codcaixa,
@@ -172,45 +172,56 @@ export class Passo3 extends React.Component {
           'Marketplace': row.parc?.parceiro,
           'Cod_Fatu': '   '
         }
-      }))
+      )))
 
-      await this.onSearch()
-      
-      await toaster.push(<Message showIcon type='success'>Salvo com sucesso!</Message>, {placement: 'topEnd', duration: 5000 })
-      
-      //Download.file(response.data.excel, 'arquivo.xlsx')
-
-      
-      try {
-        // Usuário escolhe onde salvar
-        const fileHandle = await window.showSaveFilePicker({
-          suggestedName: "meuarquivo.txt",
-          types: [
-            {
-              description: "Texto",
-              accept: { "text/plain": [".txt"] },
-            },
-          ],
-        });
-  
-        console.log(fileHandle)
-    
-        const writableStream = await fileHandle.createWritable();
-        await writableStream.write("Exemplo de conteúdo!");
-        await writableStream.close();
-    
-        console.log("Arquivo salvo com sucesso!");
-      } catch (error) {
-        console.error("Erro ao salvar o arquivo:", error);
-      }
-  
+      await Archive.saveAs(response.data.excel, 'arquivo.xlsx')
 
     } catch (error) {
-      Exception.error(error)
+      Exception.error(error);
     } finally {
-      this.setState({submting: false})
+      this.setState({ submting: false });
     }
   }
+
+  saveFile = async (base64Data) => {
+
+    const base64ToBinary = (base64) => {
+      const binaryString = window.atob(base64);  // Decodifica o Base64 para uma string binária
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      return bytes;
+    };
+
+    //const excelData = base64ToBinary(base64Data);
+
+    try {
+      // A chamada para o showSaveFilePicker agora está sendo feita dentro de um evento de clique
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: "meuarquivo.txt",
+        types: [
+          {
+            description: "Texto",
+            accept: { "text/plain": [".txt"] },
+          },
+        ],
+      });
+
+      const writableStream = await fileHandle.createWritable();
+      await writableStream.write("Exemplo de conteúdo!");
+      await writableStream.close();
+
+      console.log("Arquivo salvo com sucesso!");
+    } catch (error) {
+      console.error("Erro ao salvar o arquivo:", error);
+    }
+
+  }
+
 
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},

@@ -10,31 +10,22 @@ import { appNavs } from './config';
 import { BrowserRouter } from 'react-router-dom';
 
 
-import { EntradaSaida } from './views/entrada-saida/index.entrada-saida';
-
-//Cadastros
-import { CadastroProdutos } from './views/cadastros/produtos/index.produtos'
-import { CadastroUnidades } from './views/cadastros/unidades/index.unidades'
-import { CadastroLocais } from './views/cadastros/local/index.locais'
-import CadastroTipoEntSai from './views/cadastros/tipoEntSai/index.tipoEntSai'
-import { CadastroParceiros } from './views/cadastros/parceiros/index.parceiros'
-
-//Relatorios
-import RelatorioProduto from './views/relatorios/index.produtos'
+import { Passo1 } from './views/passo-1/index.entrada-saida';
+import { Passo2 } from './views/passo-2/index.entrada-saida';
+import { Passo3 } from './views/passo-3/index.entrada-saida';
+import { Passo4 } from './views/passo-4/index.entrada-saida';
+import { Passo5 } from './views/passo-5/index.entrada-saida';
 
 import ptBR from 'rsuite/locales/pt_BR';
 import { IntlProvider } from 'react-intl';
-import { RelatorioLocal } from './views/relatorios/index.local';
 
 export class Loading extends React.Component {
 
   static Show(message = 'Carregando...') {
     
-    var loaderElement = document.getElementById('loader')
+    var loaderElement = document.getElementsByClassName('rs-loader-content')
   
-    if (loaderElement) {
-      loaderElement.setAttribute('content', message)
-    }
+    loaderElement[0].innerHTML = message
 
     document.getElementById('loading').style.display = 'block'
     
@@ -69,21 +60,13 @@ const App = () => {
 
             <Route path="/" element={<Frame navs={appNavs} />}>
 
-              <Route index element={<EntradaSaida />} />
+              <Route index element={<Passo1 />} />
 
-              <Route path="entrada-saida" element={<EntradaSaida />} />
-
-              {/*Cadastros*/}
-              <Route path='cadastros/produtos' element={<CadastroProdutos />} />
-              <Route path='cadastros/unidades' element={<CadastroUnidades />} />
-              <Route path='cadastros/locais' element={<CadastroLocais />} />
-              <Route path='cadastros/tipos-entrada-saida' element={<CadastroTipoEntSai />} />
-              <Route path='cadastros/parceiros' element={<CadastroParceiros />} />
-
-              
-              {/*Relatorios*/}
-              <Route path='relatorios/produto' element={<RelatorioProduto />} />
-              <Route path='relatorios/local' element={<RelatorioLocal />} />
+              <Route path="passo-1" element={<Passo1 />} />
+              <Route path="passo-2" element={<Passo2 />} />
+              <Route path="passo-3" element={<Passo3 />} />
+              <Route path="passo-4" element={<Passo4 />} />
+              <Route path="passo-5" element={<Passo5 />} />
 
             </Route>
             

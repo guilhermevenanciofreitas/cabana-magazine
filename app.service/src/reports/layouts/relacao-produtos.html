@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatório</title>
+    <style>
+
+      body {
+        font-family: Arial, sans-serif;
+        margin-left: 20px;
+        margin-right: 20px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 0.4px solid black;
+        padding: 2px;
+        text-align: left;
+        font-size: 12px;
+      }
+      th {
+        padding: 2px;
+        text-align: left;
+        font-size: 12px;
+      }
+      .summary {
+        margin-top: 40px;
+        page-break-before: always;
+      }
+    </style>
+  </head>
+  <body>
+    
+    <table>
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th>Descrição do produto</th>
+          <th>Cod.barra</th>
+          <th>Qtde</th>
+          <th>Gaveta</th>
+          <th>Parceiro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% data.items.forEach(item => { %>
+          <tr>
+            <td><%= item.trans_cab %></td>
+            <td><%= new Intl.DateTimeFormat('pt-BR', { 
+              day: '2-digit', 
+              month: '2-digit', 
+              year: 'numeric' 
+            }).format(new Date(item.dataped)).replace(',', '') %></td>
+            <td><%= item.nome1 %> <%= item.nome2 %></td>
+            <td>
+              <%= item.descricao %>
+              <br>
+              <center>Preço: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.precounit) %>, Frete: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.frete) %>, Ref.: <%= item.modelo %></center>
+            </td>
+            <td><%= item.codbarra %></td>
+            <td style="text-align: center;"><%= item.qtde %></td>
+            <td><%= item.gaveta %></td>
+            <td><%= item.fat.empresa %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+
+  </body>
+</html>

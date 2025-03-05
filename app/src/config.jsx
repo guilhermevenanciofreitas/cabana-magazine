@@ -8,73 +8,33 @@ import { FaArchive, FaCalendar, FaCalendarDay, FaCalendarTimes, FaCalendarWeek, 
 
 export const appNavs = [
   {
-    eventKey: 'entrada-saida',
+    eventKey: 'passo-1',
     icon: <Icon as={MdDashboard} />,
-    title: 'Movimentação',
-    to: '/entrada-saida'
-  },
-  /*
-  {
-    eventKey: 'cadastros',
-    title: 'Cadastros',
-    icon: <Icon as={FaTruck} />,
-    children: [
-      {
-        eventKey: 'produtos',
-        title: 'Produtos',
-        to: '/cadastros/produtos'
-      },
-      {
-        eventKey: 'unidades',
-        title: 'Unidade',
-        to: '/cadastros/unidades'
-      },
-      {
-        eventKey: 'locais',
-        title: 'Local',
-        to: '/cadastros/locais'
-      },
-      {
-        eventKey: 'tipoEntSai',
-        title: 'Tipo de Entrada/Saída',
-        to: '/cadastros/tipos-entrada-saida'
-      },
-      {
-        eventKey: 'parceiros',
-        title: 'Parceiros',
-        to: '/cadastros/parceiros'
-      },
-    ]
+    title: 'Lista',
+    to: '/passo-1'
   },
   {
-    eventKey: 'relatorios',
-    title: 'Relatórios',
-    icon: <Icon as={FaArchive} />,
-    children: [
-      {
-        eventKey: 'relatorios-produto',
-        title: 'Produtos',
-        to: '/relatorios/produto'
-      },
-      {
-        eventKey: 'relatorios-local',
-        title: 'Locais',
-        to: '/relatorios/local'
-      },
-    ]
-  },*/
-  /*
-  {
-    eventKey: 'tasks',
-    icon: <Icon as={FaTasks} />,
-    title: 'Tarefas',
-    to: '/tasks'
+    eventKey: 'passo-2',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Separação',
+    to: '/passo-2'
   },
   {
-    eventKey: 'integrations',
-    icon: <Icon as={FaInfoCircle} />,
-    title: 'Integrações',
-    to: '/integrations'
+    eventKey: 'passo-3',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Gerar XML',
+    to: '/passo-3'
   },
-  */
-];
+  {
+    eventKey: 'passo-4',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Expedição',
+    to: '/passo-4'
+  },
+  {
+    eventKey: 'passo-5',
+    icon: <Icon as={MdDashboard} />,
+    title: 'Enviados',
+    to: '/passo-5'
+  },
+]

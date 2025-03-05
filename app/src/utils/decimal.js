@@ -6,13 +6,11 @@ export class Decimal {
 
     static change = (value, decimals = 2) => {
 
-        let inputValue = value;
+        value = value.replace(',', '.')
 
-        inputValue = inputValue.replace(',', '.');
+        if (!isNaN(value) && value !== '') {
 
-        if (!isNaN(inputValue) && inputValue !== '') {
-
-            const numValue = inputValue.replace(/\D/g, '');
+            const numValue = value.replace(/\D/g, '')
 
             if (numValue === '') {
                 return (0).toFixed(decimals)

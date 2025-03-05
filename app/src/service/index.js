@@ -1,14 +1,11 @@
-import { useLocation } from 'react-router-dom';
 import axios from "axios";
 import Swal from 'sweetalert2'
-import path from 'path-browserify'
 
 export class Service {
 
     Post = async (url, data, headers) => {
 
         const env = import.meta.env.VITE_API_URL
-        const api_url = path.join(env, url)
 
         let config = {};
 
@@ -54,9 +51,10 @@ export class Service {
             //Sessão expirada
             if (error?.response?.status == 400) {
                 const message = error.response.data.message
+                //Swal.fire({showCloseButton: true, title: 'Ops...', icon: 'warning', text: message, confirmButtonColor: "#FFF", confirmButtonText: 'Login'})
                 localStorage.removeItem('Authorization')
-                const to = window.location.hash.slice(1)
-                window.location.href = `/sign-in`
+                //const to = window.location.hash.slice(1)
+                //window.location.href = `/sign-in`
                 throw new Error(message)
             }
 

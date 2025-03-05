@@ -114,7 +114,7 @@ export class EntradaSaida extends React.Component {
 
     if (item) {
 
-      const rows = this.state.response.rows.map(item => item.trans_cab === row.trans_cab ? { ...item, checked: true } : item)
+      const rows = this.state.response.rows.map(item => item.trans_cab === row.trans_cab && item.codprod == row.codprod & item.codprod1 == row.codprod1 ? { ...item, checked: true } : item)
 
       this.setState({response: {...this.state.response, rows}}, async () => {
         this.onAlteraRegistro(item, item.codcaixa, item.obs)
@@ -125,13 +125,13 @@ export class EntradaSaida extends React.Component {
   }
 
   onAlteraRegistro = (row, codcaixa, obs) => {
-    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab ? { ...item, codcaixa, obs } : item)
+    const rows2 = this.state.response.rows2.map((item) => item.trans_cab === row.trans_cab && item.codprod == row.codprod & item.codprod1 == row.codprod1 ? { ...item, codcaixa, obs } : item)
     this.setState({response: {...this.state.response, rows2}})
   }
 
   onCheck = async (row, checked) => {
 
-    const rows2 = this.state.response.rows2.map(item => item.trans_cab === row.trans_cab ? { ...item, checked } : item)
+    const rows2 = this.state.response.rows2.map(item => item.trans_cab === row.trans_cab && item.codprod == row.codprod && item.codprod1 == row.codprod1 ? { ...item, checked } : item)
 
     this.setState({response: {...this.state.response, rows2}}, async () => {
       

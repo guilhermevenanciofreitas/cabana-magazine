@@ -90,10 +90,10 @@ export class Passo1 extends React.Component {
   ReportViewer = React.createRef()
 
   state = {
+    empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"},
     request: {
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
-      final: dayjs().format('YYYY-MM-DD'),
-      empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"}
+      final: dayjs().format('YYYY-MM-DD')
     }
   }
 
@@ -121,7 +121,7 @@ export class Passo1 extends React.Component {
         this.setState({loading: true})
         let result = await new Service().Post('passo-1/lista', this.state.request)
         result.data.response['rows2'] = result.data.response['rows']
-        this.setState({...result.data }, () => this.filtrar())
+        this.setState({...result.data })
         
       } catch (error) {
         Exception.error(error)
@@ -139,8 +139,21 @@ export class Passo1 extends React.Component {
 
       Loading.Show('Buscando...')
 
+      const rows = this.filtrar()
+
+      const items = rows.flatMap(row => 
+        row.itens.map(item => ({
+            ...item,
+            trans_cab: row.trans_cab,
+            nome1: row.nome1,
+            nome2: row.nome2,
+            frete: row.frete,
+            dataped: row.dataped
+        }))
+      );
+
       const report = await new Service().Post('passo-1/relatorio', {
-        items: _.filter(this.state?.response?.rows2, (item) => item.fat?.codloja == this.state?.request?.empresa?.loj_id)
+        items
       })
 
       Loading.Hide()
@@ -165,59 +178,20 @@ export class Passo1 extends React.Component {
     }
   }
 
-  filtrar = (picker, input) => {
-
-    let rows2 = _.filter(this.state?.response?.rows, (item) => {
-
-      if (_.isEmpty(input)) return true;
-  
-      switch (picker) {
-        case "parceiro": // Parceiro
-          return item.parc?.parceiro?.toUpperCase().includes(input.toUpperCase());
-        case "cliente": // Cliente
-          return item.nome1?.toUpperCase().includes(input.toUpperCase()) || item.nome2?.toUpperCase().includes(input.toUpperCase());
-        case "trans_cab": // Número
-          return item.trans_cab.toString().includes(input);
-        case "cpf": // CPF
-          return JSON.parse(item.cpf)["3"].toString().includes(input);
-        case "codbarra": // Código de barras
-          return item.codbarra?.toString().includes(input);
-        default:
-          return true;
-      }
-
-    })
-
-    console.log(this.state.apenasMercadoLivre)
-
-    if (this.state.apenasMercadoLivre) {
-      rows2 = _.filter(rows2, (item) => item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
-    } else {
-      rows2 = _.filter(rows2, (item) => !item.parc?.parceiro?.toUpperCase().includes('MERCADO LIBRE'))
-    }
-  
-    this.setState({ response: { ...this.state.response, rows2 } });
-    
-  };
-
   ExpandedComponent = (row) => {
 
-    console.log(row)
-
     const columns = [
-      //{ selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '40px', maxWidth: '40px'},
       { selector: (row) => row.codprod, name: 'Número', minWidth: '80px', maxWidth: '80px'},
       { selector: (row) => row.codbarra, name: 'Cód.Barras', minWidth: '120px', maxWidth: '120px'},
-      { selector: (row) => row.descri1, name: 'Descrição', minWidth: '300px', maxWidth: '300px'},
-      { selector: (row) => '', name: 'Loja', minWidth: '100px', maxWidth: '100px'},
+      { selector: (row) => row.descri1, name: 'Descrição'},
+      { selector: (row) => row.fat?.codloja, name: 'Loja', minWidth: '100px', maxWidth: '100px'},
       { selector: (row) => row.tamanho, name: 'Tamanho', minWidth: '100px', maxWidth: '100px'},
       { selector: (row) => row.qtde, name: 'Quantidade', minWidth: '100px', maxWidth: '100px'},
       { selector: (row) => new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.precounit), name: 'Preço Un.', minWidth: '100px', maxWidth: '100px'},
       { selector: (row) => new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.total_item), name: 'Total', minWidth: '100px', maxWidth: '100px'},
-      { selector: (row) => new Intl.NumberFormat('pt-BR', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(row.total_venda), name: 'Total Venda', minWidth: '100px', maxWidth: '100px'},
     ]
   
-    return <DataTable columns={columns} data={row.data.items} dense customStyles={customStyles} />
+    return <DataTable columns={columns} data={row.data.itens} dense customStyles={customStyles} />
   
   }
 
@@ -226,17 +200,67 @@ export class Passo1 extends React.Component {
     { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
     { selector: (row) => dayjs(row.dataped).format('DD/MM/YYYY'), name: 'Data', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => dayjs(row.dataped).format('HH:mm'), name: 'Hora', center: true, minWidth: '60px', maxWidth: '60px'},
-    { selector: (row) => row.fat?.codloja, name: 'Fat', minWidth: '30px', maxWidth: '30px'},
+    { selector: (row) => _.size(row.itens) == 1 ? row.itens[0].fat?.codloja : 'C', name: 'Fat', minWidth: '40px', maxWidth: '40px'},
     { selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '100px', maxWidth: '100px'},
     { selector: (row) => `${row.nome1} ${row.nome2}`, name: 'Cliente', maxWidth: '250px'},
     { selector: (row) => row.cidade, name: 'Cidade',  minWidth: '160px', maxWidth: '160px'},
     { selector: (row) => row.cep, name: 'CEP',  minWidth: '75px', maxWidth: '75px'},
     { selector: (row) => row.uf, name: 'UF',  minWidth: '130px', maxWidth: '130px'},
-    { selector: (row) => row.fat?.empresa, name: 'Empresa a faturar', minWidth: '250px', maxWidth: '250px'},
+    { selector: (row) => _.size(row.itens) == 1 ? row.itens[0].fat?.empresa : '[CONJUGADO]', name: 'Empresa a faturar', minWidth: '250px', maxWidth: '250px'},
     //{ selector: (row) => '0', name: 'loja', minWidth: '200px', maxWidth: '200px'},
   ]
 
+  filtrar = () => {
+
+    let { response, empresa, input, picker, apenasMercadoLivre } = this.state
+    let rows = _.cloneDeep(response?.rows || [])
+  
+    // Filtra os itens pelo código da loja (se necessário)
+    rows = rows
+      .map(row => ({
+        ...row,
+        itens: row.itens.filter(item => !empresa || empresa.loj_id === item.fat?.codloja)
+      }))
+      .filter(row => row.itens.length > 0) // Remove pedidos sem itens
+  
+    // Filtra os pedidos de acordo com o input e o picker selecionado
+    if (!_.isEmpty(input)) {
+      const search = input.toUpperCase()
+      rows = rows.filter(item => {
+        switch (picker) {
+          case "parceiro": return item.parc?.parceiro?.toUpperCase().includes(search)
+          case "cliente": return [item.nome1, item.nome2].some(nome => nome?.toUpperCase().includes(search))
+          case "trans_cab": return item.trans_cab.toString().includes(input)
+          case "cpf": return JSON.parse(item.cpf)["3"].toString().includes(input)
+          case "codbarra": return item.codbarra?.toString().includes(input)
+          default: return true
+        }
+      })
+    }
+  
+    // Filtra pedidos do Mercado Livre (ou exclui)
+    rows = rows.filter(item => {
+      const isMercadoLivre = item.parc?.parceiro?.toUpperCase().includes("MERCADO LIBRE")
+      return apenasMercadoLivre ? isMercadoLivre : !isMercadoLivre
+    })
+  
+    return rows
+
+  }  
+
   render = () => {
+
+    let rows = this.filtrar()
+
+    // Ordenando pelos itens.fat.codloja e trans_cab
+    rows = rows.sort((a, b) => {
+      const codlojaA = a.itens[0].fat?.codloja;
+      const codlojaB = b.itens[0].fat?.codloja;
+      if (codlojaA === codlojaB) {
+          return a.trans_cab - b.trans_cab; // Se os codloja forem iguais, ordena por trans_cab
+      }
+      return codlojaA - codlojaB; // Ordena por codloja
+    })
 
     return (
       <Panel header={<CustomBreadcrumb title={'Lista'} />}>
@@ -260,7 +284,7 @@ export class Passo1 extends React.Component {
                   </label>
               </div>
               <div className='form-control' style={{width: '300px'}}>
-                  <AutoComplete label='Empresa' value={this.state?.request.empresa} text={(item) => `${item.loj_nome}`} onChange={(empresa) => this.setState({request: {...this.state?.request, empresa}})} onSearch={async (search) => await Search.empresa(search, this.state?.tipoEntSai?.tipo)}>
+                  <AutoComplete label='Empresa' value={this.state?.empresa} text={(item) => `${item.loj_nome}`} onChange={(empresa) => this.setState({empresa})} onSearch={async (search) => await Search.empresa(search, this.state?.tipoEntSai?.tipo)}>
                       <AutoComplete.Result>
                           {(item) => <span>{item.loj_nome}</span>}
                       </AutoComplete.Result>
@@ -270,9 +294,9 @@ export class Passo1 extends React.Component {
             </Stack>
             
             <div style={{marginTop: '15px', display: 'flex'}}>
-              <ComboBoxWithInput onFilterChange={this.filtrar} />
+              <ComboBoxWithInput onFilterChange={(picker, input) => this.setState({picker, input})} />
               <div style={{marginTop: '10px', marginLeft: '15px'}}>
-                <input type="checkbox" id="aceitar" checked={this.state?.apenasMercadoLivre} onChange={(event) => this.setState({apenasMercadoLivre: event.target.checked}, () => this.filtrar())} />
+                <input type="checkbox" id="aceitar" checked={this.state?.apenasMercadoLivre} onChange={(event) => this.setState({apenasMercadoLivre: event.target.checked})} />
                 <label for="aceitar" style={{cursor: 'pointer'}}> Apenas MERCADO LIVRE</label>
               </div>
             </div>
@@ -282,7 +306,7 @@ export class Passo1 extends React.Component {
           <hr></hr>
           
           <Nav appearance="subtle">
-            <Nav.Item active={!this.state?.request?.bankAccount} onClick={() => this.setState({request: {...this.state.request, bankAccount: undefined}}, () => this.onSearch())}><center style={{width: 140}}>Todos<br></br>{this.state?.loading ? "-" : <>{(_.size(this.state?.response?.rows2) ?? '-')}</>}</center></Nav.Item>
+            <Nav.Item active={!this.state?.request?.bankAccount} onClick={() => this.setState({request: {...this.state.request, bankAccount: undefined}}, () => this.onSearch())}><center style={{width: 140}}>Todos<br></br>{this.state?.loading ? "-" : <>{(_.size(rows) ?? '-')}</>}</center></Nav.Item>
             {_.map(this.state?.response?.bankAccounts, (bankAccount) => {
               return <Nav.Item eventKey="home" active={this.state?.request?.bankAccount?.id == bankAccount.id} onClick={() => this.setState({request: {...this.state.request, bankAccount: bankAccount}}, () => this.onSearch())}><center style={{width: 160}}>{<><img src={bankAccount?.bank?.image} style={{height: '16px'}} />&nbsp;&nbsp;{bankAccount.name || <>{bankAccount?.agency}-{bankAccount?.agencyDigit} / {bankAccount?.account}-{bankAccount?.accountDigit}</>}</>}<br></br>{this.state?.loading ? '-' : <>R$ {bankAccount.balance}</>}</center></Nav.Item>
             })}
@@ -298,7 +322,7 @@ export class Passo1 extends React.Component {
                 fixedHeaderScrollHeight='100%'
                 dense
                 columns={this.columns}
-                data={this.state?.response?.rows2 || []}
+                data={rows}
                 expandableRows={true}
                 expandableRowsComponent={this.ExpandedComponent}
                 customStyles={customStyles}

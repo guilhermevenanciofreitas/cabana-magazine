@@ -13,7 +13,10 @@ export class AppContext2 extends Sequelize {
       username: process.env.DB_USER2,
       password: process.env.DB_PASSWORD2,
       dialect: 'mysql',
-      timezone: "America/Sao_Paulo",
+      timezone: '-03:00', // Define o fuso horário (Exemplo: Brasília -03:00)
+      dialectOptions: {
+        timezone: 'local', // Garante que o MySQL use o fuso horário local
+      },
       define: { 
         timestamps: false, 
         freezeTableName: true

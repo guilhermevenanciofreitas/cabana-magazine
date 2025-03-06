@@ -24,7 +24,7 @@ export class Passo1Controller {
     //await Authorization.verify(req, res).then(async ({company}) => {
       try {
 
-        const { inicio, final, empresa } = req.body
+        const { inicio, final } = req.body
 
         const db = new AppContext()
         const db2 = new AppContext2()
@@ -74,7 +74,7 @@ export class Passo1Controller {
           {type: Sequelize.QueryTypes.SELECT}
         )
 
-        const orders = await db2.query(`
+        const skill_cab_vendas = await db2.query(`
           SELECT
             numero,
             data,
@@ -83,11 +83,11 @@ export class Passo1Controller {
             separado,
             codloja
           FROM skill_cab_vendas
-          WHERE data BETWEEN '${inicio}' AND '${final}'`,
+          `,
           {type: Sequelize.QueryTypes.SELECT}
         )
 
-        const parceiro = await db2.query(`
+        const parceiros = await db2.query(`
           SELECT
             codparc,
             Upper(parceiro) parceiro,
@@ -113,65 +113,127 @@ export class Passo1Controller {
           {type: Sequelize.QueryTypes.SELECT}
         )
 
-        let items = []
+        const groupedOrders = productOrders.reduce((acc, item) => {
 
-        const distinctProdutOrders = [...new Map(productOrders.map(item => [`${item.trans_cab}-${item.status}-${item.dataped}-${item.cpf}`, item])).values()]
+          let order = acc.find((o) => o.trans_cab === item.trans_cab)
 
-        for (var item of distinctProdutOrders) {
-
-          const cab_venda = _.filter(orders, (cab_venda) => cab_venda.numero == item.trans_cab && dayjs(cab_venda.data).format('YYYY-MM-DD') == dayjs(item.dataped).format('YYYY-MM-DD') && cab_venda.codprod == item.codprod && cab_venda.codprod1 == item.codprod1)
-
-          if (_.size(cab_venda) > 0) {
-            continue
+          if (!order) {
+            order = {
+              trans_cab: item.trans_cab,
+              status: item.status,
+              dataped: item.dataped,
+              customer_id: item.customer_id,
+              total_venda: item.total_venda,
+              cpf: item.cpf,
+              compl: item.compl,
+              frete: item.frete,
+              emitido: item.emitido,
+              nome1: item.nome1,
+              nome2: item.nome2,
+              endereco: item.endereco,
+              bairro: item.bairro,
+              cidade: item.cidade,
+              uf: item.uf,
+              cep: item.cep,
+              status1: item.status1,
+              email: item.email,
+              fone: item.fone,
+              itens: [],
+            };
+            acc.push(order);
           }
 
-          let parc = _.filter(parceiro, (parc) => parc.email == item.email?.split("@")[1])[0]
+          order.itens.push({
+            trans_det: item.trans_det,
+            codprod: item.codprod,
+            codprod1: item.codprod1,
+            descri1: item.descri1,
+            modelo: item.modelo,
+            codbarra: item.codbarra,
+            descricao: item.descricao,
+            option_id: item.option_id,
+            option_value_id: item.option_value_id,
+            tamanho: item.tamanho,
+            qtde: item.qtde,
+            precounit: item.precounit,
+            total_item: item.total_item,
+          });
 
-          let estoq = _.filter(estoque, (estoq) => estoq.codprod == item.codprod && estoq.codprod1 == item.codprod1)
+          return acc;
+        }, [])
 
-          let codloja
+        let vendas = []
 
-          if (parc.codloja_priori == 0) {
+        for (const order of _.cloneDeep(groupedOrders)) {
 
-            if (_.sumBy(estoq, 'qtde') == 0) {
-              codloja = 1
-            } else {
-              codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
+          const parc = (_.filter(parceiros, (parc) => parc.email == order?.email?.split("@")[1]))[0]
+
+          const itens = _.cloneDeep(order.itens)
+
+          order.itens = []
+
+          for (const item of itens) {
+
+            const cab_venda = _.filter(skill_cab_vendas, (cab_venda) => cab_venda.numero == order.trans_cab && cab_venda.codprod == item.codprod && cab_venda.codprod1 == item.codprod1)
+
+            if (_.size(cab_venda) > 0) {
+              continue
             }
 
-          } else {
+            let estoq = _.filter(estoque, (estoq) => estoq.codprod == item.codprod && estoq.codprod1 == item.codprod1)
 
-            const qtde = _.filter(estoq, (estoque) => estoque.codloja == parc.codloja_priori)[0]?.qtde || 0
+            let codloja = 11
 
-            //console.log(qtde, item.qtde)
+            if (parc.codloja_priori == 0) {
 
-            if (item.qtde <= qtde) {
-
-              codloja = parc.codloja_priori
+              if (_.sumBy(estoq, 'qtde') == 0) {
+                codloja = 1
+              } else {
+                codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
+              }
 
             } else {
-              
-              estoq = _.filter(estoq, (estoque) => estoque.codloja != parc.codloja_priori)
 
-              codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
+              const qtde = _.filter(estoq, (estoque) => estoque.codloja == parc.codloja_priori)[0]?.qtde || 0
+
+              if (item.qtde <= qtde) {
+
+                codloja = parc.codloja_priori
+
+              } else {
+                
+                estoq = _.filter(estoq, (estoque) => estoque.codloja != parc.codloja_priori)
+
+                codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
+
+              }
+
+              if (!codloja) {
+                codloja = 11
+              }
 
             }
+
+            const fat = _.filter(empresas, (parc) => parc.codloja == codloja)[0]
+
+            order.itens.push({...item, fat})
+
           }
 
-          const fat = _.filter(empresas, (parc) => parc.codloja == codloja)[0]
-
-          items.push({...item, parc: parc, fat, items: _.filter(productOrders, (item2) => item2.trans_cab == item.trans_cab)})
+          if (_.size(order.itens) > 0) {
+            vendas.push({...order, parc})
+          }
 
         }
 
-        items = _.orderBy(items, ['fat.codloja', 'trans_cab'])
+        vendas = _.orderBy(vendas, ['trans_cab'])
 
         res.status(200).json({
           request: {
-            inicio, final, empresa
+            inicio, final
           },
           response: {
-            rows: items, count: items.length,
+            rows: vendas, count: vendas.length,
           }
         })
 

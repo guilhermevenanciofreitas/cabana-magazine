@@ -13,6 +13,8 @@ export class Passo4Route {
     intializeRoutes() {
         this.router.post('/lista', async (req, res) => await this.controller.lista(req, res))
         this.router.post('/salvar', async (req, res) => await this.controller.salvar(req, res))
+        this.router.post('/upload', async (req, res) => await this.controller.upload(req, res))
+        this.router.post('/danfe', async (req, res) => await this.controller.danfe(req, res))
     }
 
 }

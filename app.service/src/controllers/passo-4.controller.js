@@ -9,6 +9,8 @@ import xml2js from 'xml2js'
 import dayjs from "dayjs"
 import Sequelize from "sequelize"
 //import axios from 'axios'
+import pdf from 'pdf-parse'
+import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
 
 import fetch from 'node-fetch';
 import { Buffer } from 'buffer';
@@ -16,6 +18,9 @@ import { Exception } from "../utils/exception.js"
 
 import sql from 'mssql'
 import { AppContext2 } from "../database2/index.js"
+
+//import { createReadStream } from "fs";
+import pdfExtract from "pdf-extract";
 
 export class Passo4Controller {
 
@@ -139,6 +144,115 @@ export class Passo4Controller {
     //}).catch((error) => {
     //  res.status(400).json({message: error.message})
     //})
+  }
+
+  upload = async (req, res) => {
+   // await Authorization.verify(req, res).then(async ({companyId, userId}) => {
+      try {
+
+        const form = formidable({});
+
+        const archives = await form.parse(req)
+
+        const files = []
+
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+                
+        const uploadDir = path.join(__dirname, 'uploads');
+
+        if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+        }
+
+        for (const file of archives[1].files) {
+
+          const pdfBuffer = fs.readFileSync(file.filepath)
+ 
+          const base64Pdf = pdfBuffer.toString('base64');
+
+          const outputBuffer = Buffer.from(base64Pdf, 'base64')
+
+          const outputPath = path.join(uploadDir, file.originalFilename || 'output.pdf');
+
+          fs.writeFileSync(outputPath, outputBuffer);
+
+          files.push({pdf: base64Pdf})
+
+        }
+
+        res.status(200).json(files)
+
+      } catch (error) {
+        Exception.error(res, error)
+      }
+    //}).catch((error) => {
+    //  Exception.unauthorized(res, error)
+    //})
+  }
+
+  danfe = async (req, res) => {
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+            
+    const uploadDir = path.join(__dirname, 'uploads');
+    
+    // Lendo todos os arquivos da pasta
+    fs.readdir(uploadDir, (err, arquivos) => {
+
+      if (err) {
+          console.error('Erro ao ler a pasta:', err);
+          return;
+      }
+
+      arquivos.forEach(arquivo => {
+
+          const caminhoArquivo = path.join(uploadDir, arquivo);
+
+          // Lendo cada arquivo individualmente
+          fs.readFile(caminhoArquivo, 'utf8', (err, conteudo) => {
+              if (err) {
+                  console.error(`Erro ao ler o arquivo ${arquivo}:`, err);
+                  return;
+              }
+
+              this.buscarTextoPDF(caminhoArquivo, '007.980.041-69')
+
+              //console.log(`Conteúdo de ${arquivo}:`, conteudo)
+
+          });
+      });
+    });
+    
+    res.status(200).json(req.body.cpf)
+
+  }
+
+  async buscarTextoPDF (caminhoPDF, textoProcurado) {
+    const options = { type: "text" }; // Extração de texto puro
+
+    return new Promise((resolve, reject) => {
+        const processador = pdfExtract(caminhoPDF, options, (err, data) => {
+            if (err) {
+                reject(`Erro ao processar o PDF: ${err}`);
+                return;
+            }
+
+            const textoCompleto = data.text_pages.join(" ");
+            
+            if (textoCompleto.includes(textoProcurado)) {
+                console.log("✅ Texto encontrado no PDF!");
+                resolve(true);
+            } else {
+                console.log("❌ Texto não encontrado.");
+                resolve(false);
+            }
+        });
+
+        processador.on("error", (err) => reject(`Erro no processamento: ${err}`));
+        
+    });
   }
 
 }

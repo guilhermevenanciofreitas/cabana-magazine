@@ -10,9 +10,9 @@ export class ViewUpload extends React.Component {
 
     viewModal = React.createRef()
 
-    upload = async (ctes) => {
+    upload = async (file) => {
         if (this.state) for (const prop of Object.getOwnPropertyNames(this.state)) delete this.state[prop]
-        this.setState({...ctes})
+        this.setState({...file})
         return this.viewModal.current.show()
     }
 
@@ -27,7 +27,7 @@ export class ViewUpload extends React.Component {
                 formData.append("files", files[i])
             }
 
-            await new Service().Post('passo-4/upload', formData, {'Content-Type': 'multipart/form-data'}).then(async (result) => {
+            await new Service().Post(`passo-4/upload/${this.state?.file}`, formData, {'Content-Type': 'multipart/form-data'}).then(async (result) => {
                 await toaster.push(<Message showIcon type='success'>Salvo com sucesso!</Message>, {placement: 'topEnd', duration: 5000 })
                 this.viewModal.current?.close(result.data)
             }).finally(() => this.setState({submting: false}))
@@ -50,7 +50,7 @@ export class ViewUpload extends React.Component {
                             <Col md={12}>
                                 <div className='form-control'>
                                     <label class="textfield-filled">
-                                        <input type='file' onChange={(event) => this.setState({files: event.target.files})} accept=".pdf,.xml" multiple />
+                                        <input type='file' onChange={(event) => this.setState({files: event.target.files})} accept=".pdf,.xml,.txt" multiple />
                                         <span>Arquivo XML</span>
                                     </label>
                                 </div>

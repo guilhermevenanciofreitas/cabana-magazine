@@ -20,7 +20,8 @@ import sql from 'mssql'
 import { AppContext2 } from "../database2/index.js"
 
 //import { createReadStream } from "fs";
-import pdfExtract from "pdf-extract";
+import fsPromise from 'fs/promises';
+
 
 export class Passo4Controller {
 
@@ -146,36 +147,36 @@ export class Passo4Controller {
     //})
   }
 
-  upload = async (req, res) => {
+  uploadDanfe = async (req, res) => {
    // await Authorization.verify(req, res).then(async ({companyId, userId}) => {
       try {
 
-        const form = formidable({});
+        const form = formidable({})
 
         const archives = await form.parse(req)
 
         const files = []
 
-        const __filename = fileURLToPath(import.meta.url);
-        const __dirname = path.dirname(__filename);
-                
-        const uploadDir = path.join(__dirname, 'uploads');
+        const __filename = fileURLToPath(import.meta.url)
+        const __dirname = path.dirname(__filename)
+
+        const uploadDir = path.join(__dirname, 'uploads/danfe')
 
         if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
+            fs.mkdirSync(uploadDir, { recursive: true })
         }
 
         for (const file of archives[1].files) {
 
           const pdfBuffer = fs.readFileSync(file.filepath)
  
-          const base64Pdf = pdfBuffer.toString('base64');
+          const base64Pdf = pdfBuffer.toString('base64')
 
           const outputBuffer = Buffer.from(base64Pdf, 'base64')
 
-          const outputPath = path.join(uploadDir, file.originalFilename || 'output.pdf');
+          const outputPath = path.join(uploadDir, file.originalFilename || 'output.pdf')
 
-          fs.writeFileSync(outputPath, outputBuffer);
+          fs.writeFileSync(outputPath, outputBuffer)
 
           files.push({pdf: base64Pdf})
 
@@ -191,68 +192,128 @@ export class Passo4Controller {
     //})
   }
 
+  uploadEtiqueta = async (req, res) => {
+    // await Authorization.verify(req, res).then(async ({companyId, userId}) => {
+       try {
+ 
+         const form = formidable({})
+ 
+         const archives = await form.parse(req)
+ 
+         const files = []
+ 
+         const __filename = fileURLToPath(import.meta.url)
+         const __dirname = path.dirname(__filename)
+ 
+         const uploadDir = path.join(__dirname, 'uploads/etiqueta')
+ 
+         if (!fs.existsSync(uploadDir)) {
+             fs.mkdirSync(uploadDir, { recursive: true })
+         }
+ 
+         for (const file of archives[1].files) {
+ 
+           const pdfBuffer = fs.readFileSync(file.filepath)
+  
+           const base64Pdf = pdfBuffer.toString('base64')
+ 
+           const outputBuffer = Buffer.from(base64Pdf, 'base64')
+ 
+           const outputPath = path.join(uploadDir, file.originalFilename || 'output.pdf')
+ 
+           fs.writeFileSync(outputPath, outputBuffer)
+ 
+           files.push({pdf: base64Pdf})
+ 
+         }
+ 
+         res.status(200).json(files)
+ 
+       } catch (error) {
+         Exception.error(res, error)
+       }
+     //}).catch((error) => {
+     //  Exception.unauthorized(res, error)
+     //})
+   }
+
   danfe = async (req, res) => {
+    try {
 
-    const __filename = fileURLToPath(import.meta.url);
-    const __dirname = path.dirname(__filename);
-            
-    const uploadDir = path.join(__dirname, 'uploads');
-    
-    // Lendo todos os arquivos da pasta
-    fs.readdir(uploadDir, (err, arquivos) => {
+      const __filename = fileURLToPath(import.meta.url)
+      const __dirname = path.dirname(__filename)
+      const uploadDir = path.join(__dirname, 'uploads/danfe')
 
-      if (err) {
-          console.error('Erro ao ler a pasta:', err);
-          return;
+      const arquivos = await fsPromise.readdir(uploadDir)
+
+      for (const arquivo of arquivos) {
+
+        const caminhoArquivo = path.join(uploadDir, arquivo);
+
+        const contemTexto = this.verificarTextoNoArquivo(caminhoArquivo, req.body.cpf)
+        if (contemTexto) {
+          const caminhoPDF = caminhoArquivo.replace('procNfe.xml', 'DANFE.pdf')
+          const base64 = this.converterArquivoParaBase64(caminhoPDF)
+          return res.status(200).json({ pdf: base64 })
+        }
       }
 
-      arquivos.forEach(arquivo => {
+      return res.status(201).json({ message: 'Arquivo não encontrado!' })
 
-          const caminhoArquivo = path.join(uploadDir, arquivo);
-
-          // Lendo cada arquivo individualmente
-          fs.readFile(caminhoArquivo, 'utf8', (err, conteudo) => {
-              if (err) {
-                  console.error(`Erro ao ler o arquivo ${arquivo}:`, err);
-                  return;
-              }
-
-              this.buscarTextoPDF(caminhoArquivo, '007.980.041-69')
-
-              //console.log(`Conteúdo de ${arquivo}:`, conteudo)
-
-          });
-      });
-    });
-    
-    res.status(200).json(req.body.cpf)
-
+    } catch (error) {
+      Exception.error(res, error)
+    }
   }
 
-  async buscarTextoPDF (caminhoPDF, textoProcurado) {
-    const options = { type: "text" }; // Extração de texto puro
+  etiqueta = async (req, res) => {
+    try {
 
-    return new Promise((resolve, reject) => {
-        const processador = pdfExtract(caminhoPDF, options, (err, data) => {
-            if (err) {
-                reject(`Erro ao processar o PDF: ${err}`);
-                return;
-            }
+      const __filename = fileURLToPath(import.meta.url)
+      const __dirname = path.dirname(__filename)
+      const uploadDir = path.join(__dirname, 'uploads/etiqueta')
 
-            const textoCompleto = data.text_pages.join(" ");
-            
-            if (textoCompleto.includes(textoProcurado)) {
-                console.log("✅ Texto encontrado no PDF!");
-                resolve(true);
-            } else {
-                console.log("❌ Texto não encontrado.");
-                resolve(false);
-            }
-        });
+      const arquivos = await fsPromise.readdir(uploadDir)
 
-        processador.on("error", (err) => reject(`Erro no processamento: ${err}`));
-        
-    });
+      for (const arquivo of arquivos) {
+
+        const caminhoArquivo = path.join(uploadDir, arquivo);
+
+        const contemTexto = this.verificarTextoNoArquivo(caminhoArquivo, req.body.etiqueta)
+        if (contemTexto) {
+          const caminhoPDF = caminhoArquivo.replace('.txt', '.pdf')
+          const base64 = this.converterArquivoParaBase64(caminhoPDF)
+          return res.status(200).json({ pdf: base64 })
+        }
+      }
+
+      return res.status(201).json({ message: 'Arquivo não encontrado!' })
+
+    } catch (error) {
+      Exception.error(res, error)
+    }
+  }
+
+  verificarTextoNoArquivo = (caminhoArquivo, textoProcurado) => {
+    try {
+        const conteudo = fs.readFileSync(caminhoArquivo, 'utf8')
+        if (conteudo.includes(textoProcurado)) {
+            return true
+        } else {
+            return false
+        }
+    } catch (erro) {
+        return false
+    }
+  }
+
+  converterArquivoParaBase64 = (caminhoArquivo) => {
+    try {
+        const dados = fs.readFileSync(caminhoArquivo)
+        const base64 = dados.toString('base64')
+        return base64
+    } catch (erro) {
+        return null
+    }
   }
 
 }

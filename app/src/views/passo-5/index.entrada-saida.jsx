@@ -6,13 +6,17 @@ import dayjs from 'dayjs'
 import PageContent from '../../components/PageContent'
 
 import { AutoComplete, CustomBreadcrumb, DataTable } from '../../controls'
-import { FaCheckCircle, FaSearch } from 'react-icons/fa'
+import { FaArchive, FaCheckCircle, FaPrint, FaSearch } from 'react-icons/fa'
 import { Service } from '../../service'
 
 import _ from 'lodash'
 import { Exception } from '../../utils/exception'
 import { Search } from '../../search'
 import { Loading } from '../../App'
+
+import { ViewUpload } from '../passo-4/view.upload'
+import { ReportViewer } from '../../controls/components/ReportViewer'
+import Swal from 'sweetalert2'
 
 const options = [
   { label: "Parceiro", value: "parceiro" },
@@ -59,6 +63,10 @@ function ComboBoxWithInput({ onFilterChange }) {
 
 
 export class Passo5 extends React.Component {
+
+  viewUpload = React.createRef()
+  
+  reportViewer = React.createRef()
 
   state = {
     request: {
@@ -184,6 +192,56 @@ export class Passo5 extends React.Component {
     }
   }
 
+  uploadDanfe = async () => {
+    await this.viewUpload.current.upload({file: 'danfe'})
+  }
+
+  uploadEtiqueta = async () => {
+    await this.viewUpload.current.upload({file: 'etiqueta'})
+  }
+
+  danfe = async (cpf) => {
+    try {
+
+      Loading.Show()
+      const response = await new Service().Post('passo-4/danfe', {cpf})
+      Loading.Hide()
+
+      if (response.status == 201) {
+        await Swal.fire({title: '', text: response.data.message, icon: 'warning', confirmButtonText: 'OK'})
+        return
+      }
+
+      this.reportViewer.current.visualize(response.data.pdf)
+
+    } catch (error) {
+      Exception.error(error)
+    } finally {
+      Loading.Hide()
+    }
+  }
+
+  etiqueta = async (etiqueta) => {
+    try {
+
+      Loading.Show()
+      const response = await new Service().Post('passo-4/etiqueta', {etiqueta})
+      Loading.Hide()
+
+      if (response.status == 201) {
+        await Swal.fire({title: '', text: response.data.message, icon: 'warning', confirmButtonText: 'OK'})
+        return
+      }
+
+      this.reportViewer.current.visualize(response.data.pdf)
+
+    } catch (error) {
+      Exception.error(error)
+    } finally {
+      Loading.Hide()
+    }
+  }
+
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
     { selector: (row) => row.trans_cab, name: 'Número', center: true, minWidth: '80px', maxWidth: '80px'},
@@ -195,8 +253,8 @@ export class Passo5 extends React.Component {
     { selector: (row) => row.descricao, name: 'Descrição'},
     { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
-    { selector: (row) => '', name: 'Imp.Etiq', minWidth: '100px', maxWidth: '100px'},
-    { selector: (row) => '', name: 'Imp.Danfe', minWidth: '100px', maxWidth: '100px'},
+    { selector: (row) => <FaPrint size='16px' color='tomato' style={{padding: '3px'}} onClick={() => this.etiqueta(row.nome1 + ' ' + row.nome2)} />, name: 'Etiq.', center: true, minWidth: '50px', maxWidth: '50px', style: {padding: '0px'}},
+    { selector: (row) => <FaPrint size='16px' color='tomato' style={{padding: '3px'}} onClick={() => this.danfe(JSON.parse(row.cpf)['3'])} />, name: 'Danfe', center: true, minWidth: '50px', maxWidth: '50px', style: {padding: '0px'}},
     { selector: (row) => row.codloja, name: 'Loja', minWidth: '55px', maxWidth: '55px'},
     { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
     { selector: (row) => row.precounit, name: 'Preço Unit.', minWidth: '80px', maxWidth: '80px'},
@@ -209,6 +267,10 @@ export class Passo5 extends React.Component {
 
     return (
       <Panel header={<CustomBreadcrumb title={'Enviados'} />}>
+
+        <ViewUpload ref={this.viewUpload} />
+        
+        <ReportViewer ref={this.reportViewer} />
 
         <PageContent>
           
@@ -262,6 +324,8 @@ export class Passo5 extends React.Component {
           <Stack direction='row' alignItems='flexStart' justifyContent='space-between'>
             <Stack spacing={5}>
               <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Salvando...</> : <><FaCheckCircle /> &nbsp; Salvar</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.uploadDanfe} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos DANFE</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.uploadEtiqueta} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos Etiqueta</>}</Button>
             </Stack>
           </Stack>
           

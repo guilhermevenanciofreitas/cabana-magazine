@@ -16,6 +16,7 @@ import { Loading } from '../../App'
 
 import { ViewUpload } from './view.upload'
 import { ReportViewer } from '../../controls/components/ReportViewer'
+import Swal from 'sweetalert2'
 
 const options = [
   { label: "Parceiro", value: "parceiro" },
@@ -191,10 +192,12 @@ export class Passo4 extends React.Component {
     }
   }
 
-  upload = async () => {
-    await this.viewUpload.current.upload()
-    //await this.reportViewer.current.visualize(submited[0].pdf)
-    //if (submited) this.onSearch()
+  uploadDanfe = async () => {
+    await this.viewUpload.current.upload({file: 'danfe'})
+  }
+
+  uploadEtiqueta = async () => {
+    await this.viewUpload.current.upload({file: 'etiqueta'})
   }
 
   danfe = async (cpf) => {
@@ -202,6 +205,34 @@ export class Passo4 extends React.Component {
 
       Loading.Show()
       const response = await new Service().Post('passo-4/danfe', {cpf})
+      Loading.Hide()
+
+      if (response.status == 201) {
+        await Swal.fire({title: '', text: response.data.message, icon: 'warning', confirmButtonText: 'OK'})
+        return
+      }
+
+      this.reportViewer.current.visualize(response.data.pdf)
+
+    } catch (error) {
+      Exception.error(error)
+    } finally {
+      Loading.Hide()
+    }
+  }
+
+  etiqueta = async (etiqueta) => {
+    try {
+
+      Loading.Show()
+      const response = await new Service().Post('passo-4/etiqueta', {etiqueta})
+      Loading.Hide()
+
+      if (response.status == 201) {
+        await Swal.fire({title: '', text: response.data.message, icon: 'warning', confirmButtonText: 'OK'})
+        return
+      }
+
       this.reportViewer.current.visualize(response.data.pdf)
 
     } catch (error) {
@@ -222,10 +253,9 @@ export class Passo4 extends React.Component {
     { selector: (row) => row.descricao, name: 'Descrição'},
     { selector: (row) => row.tamanho, name: 'Tamanho', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => row.qtde, name: 'Qtde', center: true, minWidth: '55px', maxWidth: '55px'},
-    { selector: (row) => '', name: 'Imp.Etiq', minWidth: '30px', maxWidth: '30px'},
-    //{ selector: (row) => '', name: 'Imp.Danfe', minWidth: '100px', maxWidth: '100px'},
-    { selector: (row) => <FaPrint size='16px' color='tomato' style={{padding: '3px'}} onClick={() => this.danfe(JSON.parse(row.cpf)['3'])} />, center: true, minWidth: '50px', maxWidth: '50px', style: {padding: '0px'}},
-    { selector: (row) => row.codloja, name: 'Loja', minWidth: '55px', maxWidth: '55px'},
+    { selector: (row) => <FaPrint size='16px' color='tomato' style={{padding: '3px'}} onClick={() => this.etiqueta(row.nome1 + ' ' + row.nome2)} />, name: 'Etiq.', center: true, minWidth: '50px', maxWidth: '50px', style: {padding: '0px'}},
+    { selector: (row) => <FaPrint size='16px' color='tomato' style={{padding: '3px'}} onClick={() => this.danfe(JSON.parse(row.cpf)['3'])} />, name: 'Danfe', center: true, minWidth: '50px', maxWidth: '50px', style: {padding: '0px'}},
+    { selector: (row) => row.codloja, name: 'Loja', center: true, minWidth: '55px', maxWidth: '55px'},
     { selector: (row) => row.parc?.parceiro, name: 'Parceiro', minWidth: '140px', maxWidth: '140px'},
     { selector: (row) => row.precounit, name: 'Preço Unit.', minWidth: '80px', maxWidth: '80px'},
     { selector: (row) => row.codcaixa, name: 'Cod. caixa', center: true, minWidth: '70px', maxWidth: '70px'},
@@ -294,7 +324,8 @@ export class Passo4 extends React.Component {
           <Stack direction='row' alignItems='flexStart' justifyContent='space-between'>
             <Stack spacing={5}>
               <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Salvando...</> : <><FaCheckCircle /> &nbsp; Salvar</>}</Button>
-              <Button appearance="primary" color='blue' onClick={this.upload} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.uploadDanfe} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos DANFE</>}</Button>
+              <Button appearance="primary" color='blue' onClick={this.uploadEtiqueta} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos Etiqueta</>}</Button>
             </Stack>
           </Stack>
           

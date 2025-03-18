@@ -296,7 +296,7 @@ export class Passo4Controller {
   verificarTextoNoArquivo = (caminhoArquivo, textoProcurado) => {
     try {
         const conteudo = fs.readFileSync(caminhoArquivo, 'utf8')
-        if (conteudo.includes(textoProcurado)) {
+        if (conteudo.toUpperCase().includes(textoProcurado.toUpperCase())) {
             return true
         } else {
             return false

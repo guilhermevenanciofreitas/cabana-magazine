@@ -1,5 +1,7 @@
 node_modules/
+src/controllers/uploads/
 dist/
+public/
 .env
 # Local Netlify folder
 .netlify

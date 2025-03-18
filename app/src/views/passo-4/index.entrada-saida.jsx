@@ -289,7 +289,7 @@ export class Passo4 extends React.Component {
                   </label>
               </div>
               <div className='form-control' style={{width: '300px'}}>
-                  <AutoComplete label='Empresa' value={this.state?.request.empresa} text={(item) => `${item.loj_nome}`} onChange={(empresa) => this.setState({request: {...this.state?.request, empresa}})} onSearch={async (search) => await Search.empresa(search, this.state?.tipoEntSai?.tipo)}>
+                  <AutoComplete label='Empresa' value={this.state?.request?.empresa} text={(item) => `${item.loj_nome}`} onChange={(empresa) => this.setState({request: {...this.state?.request, empresa}})} onSearch={async (search) => await Search.empresa(search, this.state?.tipoEntSai?.tipo)}>
                       <AutoComplete.Result>
                           {(item) => <span>{item.loj_nome}</span>}
                       </AutoComplete.Result>

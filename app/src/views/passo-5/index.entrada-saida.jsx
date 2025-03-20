@@ -72,7 +72,7 @@ export class Passo5 extends React.Component {
     request: {
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
       final: dayjs().format('YYYY-MM-DD'),
-      empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"}
+      //empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"}
     }
   }
 

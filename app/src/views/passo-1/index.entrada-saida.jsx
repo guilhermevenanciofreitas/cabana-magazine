@@ -90,7 +90,7 @@ export class Passo1 extends React.Component {
   ReportViewer = React.createRef()
 
   state = {
-    empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"},
+    //empresa: {loj_id: 1, loj_nome: "Cabana Do Sapato - Pio XII"},
     request: {
       inicio: dayjs().add(-1, 'day').format('YYYY-MM-DD'),
       final: dayjs().format('YYYY-MM-DD')

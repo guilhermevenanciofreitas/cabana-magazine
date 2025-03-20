@@ -89,8 +89,6 @@ export class Passo5Controller {
 
         }
 
-        items = _.filter(items, (item) => item?.status?.toUpperCase()?.includes('CONFIR'))
-
         res.status(200).json({
           request: {
             inicio, final, empresa, limit, offset

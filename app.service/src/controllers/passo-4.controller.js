@@ -78,8 +78,16 @@ export class Passo4Controller {
 
         for (var item of productOrders) {
 
+          if (item.trans_cab != 415469) {
+            continue
+          }
+
+          console.log(item)
+
           const cab_venda = _.filter(skill_cab_vendas, (item2) => item2.numero == item.trans_cab && dayjs(item2.data).format('YYYY-MM-DD') == dayjs(item.dataped).format('YYYY-MM-DD') && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
           
+          console.log(_.size(cab_venda))
+
           if (_.size(cab_venda) > 0) {
 
             if (empresa?.loj_id && empresa?.loj_id != cab_venda[0]?.codloja) {
@@ -95,8 +103,6 @@ export class Passo4Controller {
           }
 
         }
-
-        items = _.filter(items, (item) => item?.status?.toUpperCase()?.includes('CONFIR'))
 
         res.status(200).json({
           request: {

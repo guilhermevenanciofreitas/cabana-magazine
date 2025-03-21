@@ -11,6 +11,12 @@ import { Passo3Route } from './src/routes/passo-3.route.js'
 import { Passo4Route } from './src/routes/passo-4.route.js'
 import { Passo5Route } from './src/routes/passo-5.route.js'
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export const directory = {
+  uploads: path.join(__dirname, 'uploads')
+}
+
 export class App {
 
   express = express()

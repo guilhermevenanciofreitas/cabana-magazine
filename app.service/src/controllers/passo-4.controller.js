@@ -22,6 +22,8 @@ import { AppContext2 } from "../database2/index.js"
 //import { createReadStream } from "fs";
 import fsPromise from 'fs/promises';
 
+import { directory } from "../../app.js"
+
 
 export class Passo4Controller {
 
@@ -78,15 +80,7 @@ export class Passo4Controller {
 
         for (var item of productOrders) {
 
-          if (item.trans_cab != 415469) {
-            continue
-          }
-
-          console.log(item)
-
           const cab_venda = _.filter(skill_cab_vendas, (item2) => item2.numero == item.trans_cab && dayjs(item2.data).format('YYYY-MM-DD') == dayjs(item.dataped).format('YYYY-MM-DD') && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
-          
-          console.log(_.size(cab_venda))
 
           if (_.size(cab_venda) > 0) {
 
@@ -163,10 +157,7 @@ export class Passo4Controller {
 
         const files = []
 
-        const __filename = fileURLToPath(import.meta.url)
-        const __dirname = path.dirname(__filename)
-
-        const uploadDir = path.join(__dirname, 'uploads/danfe')
+        const uploadDir = path.join(directory.uploads, 'danfe')
 
         if (!fs.existsSync(uploadDir)) {
             fs.mkdirSync(uploadDir, { recursive: true })
@@ -208,10 +199,7 @@ export class Passo4Controller {
  
          const files = []
  
-         const __filename = fileURLToPath(import.meta.url)
-         const __dirname = path.dirname(__filename)
- 
-         const uploadDir = path.join(__dirname, 'uploads/etiqueta')
+         const uploadDir = path.join(directory.uploads, 'etiqueta')
  
          if (!fs.existsSync(uploadDir)) {
              fs.mkdirSync(uploadDir, { recursive: true })
@@ -246,9 +234,7 @@ export class Passo4Controller {
   danfe = async (req, res) => {
     try {
 
-      const __filename = fileURLToPath(import.meta.url)
-      const __dirname = path.dirname(__filename)
-      const uploadDir = path.join(__dirname, 'uploads/danfe')
+      const uploadDir = path.join(directory.uploads, 'danfe')
 
       const arquivos = await fsPromise.readdir(uploadDir)
 
@@ -264,7 +250,7 @@ export class Passo4Controller {
         }
       }
 
-      return res.status(201).json({ message: 'Arquivo não encontrado!' })
+      return res.status(201).json({ message: 'Arquivo nÃ£o encontrado!' })
 
     } catch (error) {
       Exception.error(res, error)
@@ -274,9 +260,7 @@ export class Passo4Controller {
   etiqueta = async (req, res) => {
     try {
 
-      const __filename = fileURLToPath(import.meta.url)
-      const __dirname = path.dirname(__filename)
-      const uploadDir = path.join(__dirname, 'uploads/etiqueta')
+      const uploadDir = path.join(directory.uploads, 'etiqueta')
 
       const arquivos = await fsPromise.readdir(uploadDir)
 
@@ -292,7 +276,7 @@ export class Passo4Controller {
         }
       }
 
-      return res.status(201).json({ message: 'Arquivo não encontrado!' })
+      return res.status(201).json({ message: 'Arquivo nÃ£o encontrado!' })
 
     } catch (error) {
       Exception.error(res, error)

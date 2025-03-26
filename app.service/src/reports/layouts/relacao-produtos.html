@@ -59,14 +59,14 @@
             }).format(new Date(item.dataped)).replace(',', '') %></td>
             <td><%= item.nome1 %> <%= item.nome2 %></td>
             <td>
-              <%= item.descricao %>
+              <%= item.descricao %>&nbsp;&nbsp;&nbsp;&nbsp;TAM/COR: <%= item.tamanho %>
               <br>
-              <center>Preço: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.precounit) %>, Frete: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.frete) %>, Ref.: <%= item.modelo %></center>
+              <div style="margin-left: 80px;">Preço: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.precounit) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Frete: <%= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(item.frete) %> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Ref.: <%= item.modelo %></div>
             </td>
             <td><%= item.codbarra %></td>
             <td style="text-align: center;"><%= item.qtde %></td>
-            <td><%= item.gaveta %></td>
-            <td><%= item.fat.empresa %></td>
+            <td style="text-align: center;">0</td>
+            <td><%= item.parc?.parceiro %></td>
           </tr>
         <% }); %>
       </tbody>

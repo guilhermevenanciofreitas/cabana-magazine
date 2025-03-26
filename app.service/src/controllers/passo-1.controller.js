@@ -252,7 +252,7 @@ export class Passo1Controller {
         const report = await Report.generate({
           report: 'relacao-produtos.html',
           company: req.body.items[0].fat?.empresa,
-          title: 'RelatÃ³rio de produtos',
+          title: 'Relatório de produtos',
           data: {
             items: req.body.items
           }

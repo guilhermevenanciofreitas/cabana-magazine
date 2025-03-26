@@ -10,31 +10,31 @@ export const appNavs = [
   {
     eventKey: 'passo-1',
     icon: <Icon as={MdDashboard} />,
-    title: 'Lista',
+    title: '1 - Lista',
     to: '/passo-1'
   },
   {
     eventKey: 'passo-2',
     icon: <Icon as={MdDashboard} />,
-    title: 'Separação',
+    title: '2 - Separação',
     to: '/passo-2'
   },
   {
     eventKey: 'passo-3',
     icon: <Icon as={MdDashboard} />,
-    title: 'Gerar XML',
+    title: '3 - Gerar XML',
     to: '/passo-3'
   },
   {
     eventKey: 'passo-4',
     icon: <Icon as={MdDashboard} />,
-    title: 'Expedição',
+    title: '4 - Expedição',
     to: '/passo-4'
   },
   {
     eventKey: 'passo-5',
     icon: <Icon as={MdDashboard} />,
-    title: 'Enviados',
+    title: '5 - Enviados',
     to: '/passo-5'
   },
 ]

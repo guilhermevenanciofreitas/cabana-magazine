@@ -148,7 +148,8 @@ export class Passo1 extends React.Component {
             nome1: row.nome1,
             nome2: row.nome2,
             frete: row.frete,
-            dataped: row.dataped
+            dataped: row.dataped,
+            parc: row.parc
         }))
       );
 

@@ -10,6 +10,7 @@ import { SearchRoute } from './src/routes/search.js'
 import { Passo3Route } from './src/routes/passo-3.route.js'
 import { Passo4Route } from './src/routes/passo-4.route.js'
 import { Passo5Route } from './src/routes/passo-5.route.js'
+import { EstoqueRoute } from './src/routes/estoque.route.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -52,6 +53,8 @@ export class App {
     this.express.use('/api/passo-3', new Passo3Route().router)
     this.express.use('/api/passo-4', new Passo4Route().router)
     this.express.use('/api/passo-5', new Passo5Route().router)
+
+    this.express.use('/api/estoque', new EstoqueRoute().router)
 
     this.express.use('/api/search', new SearchRoute().router)
 

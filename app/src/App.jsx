@@ -18,6 +18,7 @@ import { Passo5 } from './views/passo-5/index.entrada-saida';
 
 import ptBR from 'rsuite/locales/pt_BR';
 import { IntlProvider } from 'react-intl';
+import { Estoque } from './views/estoque/index.estoque';
 
 export class Loading extends React.Component {
 
@@ -67,6 +68,7 @@ const App = () => {
               <Route path="passo-3" element={<Passo3 />} />
               <Route path="passo-4" element={<Passo4 />} />
               <Route path="passo-5" element={<Passo5 />} />
+              <Route path="estoque" element={<Estoque />} />
 
             </Route>
             

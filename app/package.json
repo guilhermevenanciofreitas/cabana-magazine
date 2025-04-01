@@ -38,6 +38,7 @@
     "react-intl": "^7.0.1",
     "react-pdf": "^9.2.1",
     "react-router-dom": "^6.28.0",
+    "react-window": "^1.8.11",
     "rsuite": "^5.74.2",
     "sweetalert2": "^11.14.5",
     "toast": "^0.5.4"

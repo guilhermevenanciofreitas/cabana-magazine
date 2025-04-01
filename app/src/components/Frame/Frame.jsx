@@ -20,7 +20,7 @@ const NavItem = props => {
 
 const Frame = (props) => {
   const { navs } = props;
-  const [expand, setExpand] = useState(true);
+  const [expand, setExpand] = useState(false);
   const [hoverExpand, setHoverExpand] = useState(false);
   const [windowHeight, setWindowHeight] = useState(getHeight(window));
 

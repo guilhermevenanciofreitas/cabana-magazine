@@ -74,6 +74,8 @@ const ControlDataTable = ({height, dense = true, loading, columns, rows, noDataC
             onSelectedRowsChange={(args) => onSelected(args.selectedRows)}
             customStyles={customStyles}
             style={{ height: '100%' }} // Faz o DataTable ocupar 100% do contêiner
+            pagination={true}
+            paginationPerPage={250}
           />
         </div>
       }

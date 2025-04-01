@@ -153,6 +153,8 @@ export class Passo1 extends React.Component {
         }))
       );
 
+      
+
       const report = await new Service().Post('passo-1/relatorio', {
         items
       })
@@ -202,7 +204,7 @@ export class Passo1 extends React.Component {
     { selector: (row) => dayjs(row.dataped).format('DD/MM/YYYY'), name: 'Data', center: true, minWidth: '90px', maxWidth: '90px'},
     { selector: (row) => dayjs(row.dataped).format('HH:mm'), name: 'Hora', center: true, minWidth: '60px', maxWidth: '60px'},
     { selector: (row) => _.size(row.itens) == 1 ? row.itens[0].fat?.codloja : 'C', name: 'Fat', minWidth: '40px', maxWidth: '40px'},
-    { selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '100px', maxWidth: '100px'},
+    //{ selector: (row) => JSON.parse(row.cpf)['3'], name: 'CPF', minWidth: '100px', maxWidth: '100px'},
     { selector: (row) => `${row.nome1} ${row.nome2}`, name: 'Cliente', maxWidth: '250px'},
     { selector: (row) => row.cidade, name: 'Cidade',  minWidth: '160px', maxWidth: '160px'},
     { selector: (row) => row.cep, name: 'CEP',  minWidth: '75px', maxWidth: '75px'},
@@ -216,6 +218,8 @@ export class Passo1 extends React.Component {
     let { response, empresa, input, picker, apenasMercadoLivre } = this.state
     let rows = _.cloneDeep(response?.rows || [])
   
+    console.log(empresa?.loj_id)
+
     // Filtra os itens pelo código da loja (se necessário)
     rows = rows
       .map(row => ({

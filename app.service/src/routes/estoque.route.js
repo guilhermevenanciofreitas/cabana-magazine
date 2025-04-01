@@ -1,7 +1,7 @@
 import { Router } from 'express'
 import { EstoqueController } from '../controllers/estoque.controller.js'
 
-export class Passo5Route {
+export class EstoqueRoute {
 
     router = Router()
     controller = new EstoqueController()

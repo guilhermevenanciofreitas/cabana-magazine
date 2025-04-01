@@ -182,39 +182,115 @@ export class Passo1Controller {
 
             let estoq = _.filter(estoque, (estoq) => estoq.codprod == item.codprod && estoq.codprod1 == item.codprod1)
 
-            let codloja = 11
+            // Filtra por cada codloja
+            const w1 = estoq.find(row => row.codloja === 1);
+            const w2 = estoq.find(row => row.codloja === 8);
+            const w3 = estoq.find(row => row.codloja === 10);
+            const w4 = estoq.find(row => row.codloja === 11);
+            const w5 = estoq.find(row => row.codloja === 12);
 
-            if (parc.codloja_priori == 0) {
+            const west1  = w1 ? w1.qtde : 0;
+            const west8  = w2 ? w2.qtde : 0;
+            const west10 = w3 ? w3.qtde : 0;
+            const west11 = w4 ? w4.qtde : 0;
+            const west12 = w5 ? w5.qtde : 0;
 
-              if (_.sumBy(estoq, 'qtde') == 0) {
-                codloja = 1
-              } else {
-                codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
+            let wcodloja
+
+             // Determina o código da loja com base no 'codloja_priori'
+              switch (parc?.codloja_priori) {
+                case 0:
+                  if ((west1 + west8 + west10 + west11 + west12) === 0) {
+                    wcodloja = 1;
+                  } else {
+                    // Cria um array temporário com os estoques
+                    const wm = [
+                      { loja: 1, est: west1 },
+                      { loja: 8, est: west8 },
+                      { loja: 10, est: west10 },
+                      { loja: 11, est: west11 },
+                      { loja: 12, est: west12 }
+                    ];
+                    // Ordena de forma decrescente pelo estoque
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].loja;
+                  }
+                  break;
+                case 1:
+                  if (item.qtde <= west1) {
+                    wcodloja = 1;
+                  } else {
+                    const wm = [
+                      { loja: 8, est: west8 },
+                      { loja: 10, est: west10 },
+                      { loja: 11, est: west11 },
+                      { loja: 12, est: west12 }
+                    ];
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].est > 0 ? wm[0].loja : 1;
+                  }
+                  break;
+                case 8:
+                  if (item.qtde <= west8) {
+                    wcodloja = 8;
+                  } else {
+                    const wm = [
+                      { loja: 1, est: west1 },
+                      { loja: 10, est: west10 },
+                      { loja: 11, est: west11 },
+                      { loja: 12, est: west12 }
+                    ];
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].est > 0 ? wm[0].loja : 8;
+                  }
+                  break;
+                case 10:
+                  if (item.qtde <= west10) {
+                    wcodloja = 10;
+                  } else {
+                    const wm = [
+                      { loja: 1, est: west1 },
+                      { loja: 8, est: west8 },
+                      { loja: 11, est: west11 },
+                      { loja: 12, est: west12 }
+                    ];
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].est > 0 ? wm[0].loja : 10;
+                  }
+                  break;
+                case 11:
+                  if (item.qtde <= west11) {
+                    wcodloja = 11;
+                  } else {
+                    const wm = [
+                      { loja: 1, est: west1 },
+                      { loja: 8, est: west8 },
+                      { loja: 10, est: west10 },
+                      { loja: 12, est: west12 }
+                    ];
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].est > 0 ? wm[0].loja : 11;
+                  }
+                  break;
+                case 12:
+                  if (item.qtde <= west12) {
+                    wcodloja = 12;
+                  } else {
+                    const wm = [
+                      { loja: 1, est: west1 },
+                      { loja: 8, est: west8 },
+                      { loja: 10, est: west10 },
+                      { loja: 11, est: west11 }
+                    ];
+                    wm.sort((a, b) => b.est - a.est);
+                    wcodloja = wm[0].est > 0 ? wm[0].loja : 12;
+                  }
+                  break;
+                default:
+                  wcodloja = 0;
               }
 
-            } else {
-
-              const qtde = _.filter(estoq, (estoque) => estoque.codloja == parc.codloja_priori)[0]?.qtde || 0
-
-              if (item.qtde <= qtde) {
-
-                codloja = parc.codloja_priori
-
-              } else {
-                
-                estoq = _.filter(estoq, (estoque) => estoque.codloja != parc.codloja_priori)
-
-                codloja = _.orderBy(estoq, ['qtde'], ['desc'])[0]?.codloja
-
-              }
-
-              if (!codloja) {
-                codloja = 11
-              }
-
-            }
-
-            const fat = _.filter(empresas, (parc) => parc.codloja == codloja)[0]
+            const fat = _.filter(empresas, (parc) => parc.codloja == wcodloja)[0]
 
             order.itens.push({...item, fat})
 
@@ -294,8 +370,8 @@ export class Passo1Controller {
                 UPDATE produto_pendente SET prod_pen_loja_id_saida = '${item.fat?.codloja}' WHERE prod_pen_id_pedido = '${item.trans_cab}' AND prod_pen_codigo_de_barras = '${item.codbarra}';
               `
   
-              await db.query(sqlInsert, {type: Sequelize.QueryTypes.INSERT, transaction})
-              await db.query(sqlUpdate, {type: Sequelize.QueryTypes.UPDATE, transaction})
+              //await db.query(sqlInsert, {type: Sequelize.QueryTypes.INSERT, transaction})
+              //await db.query(sqlUpdate, {type: Sequelize.QueryTypes.UPDATE, transaction})
 
             }
   

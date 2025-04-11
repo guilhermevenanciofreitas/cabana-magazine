@@ -17,6 +17,7 @@ export class Passo4Route {
         this.router.post('/upload/etiqueta', async (req, res) => await this.controller.uploadEtiqueta(req, res))
         this.router.post('/danfe', async (req, res) => await this.controller.danfe(req, res))
         this.router.post('/etiqueta', async (req, res) => await this.controller.etiqueta(req, res))
+        this.router.post('/excluir-arquivos', async (req, res) => await this.controller.excluirArquivos(req, res))
     }
 
 }

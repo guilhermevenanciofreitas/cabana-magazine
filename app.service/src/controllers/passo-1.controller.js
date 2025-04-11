@@ -83,6 +83,7 @@ export class Passo1Controller {
             separado,
             codloja
           FROM skill_cab_vendas
+          WHERE data between '${inicio} 00:00:00' and '${final} 23:59:59'
           `,
           {type: Sequelize.QueryTypes.SELECT}
         )
@@ -174,7 +175,8 @@ export class Passo1Controller {
 
           for (const item of itens) {
 
-            const cab_venda = _.filter(skill_cab_vendas, (cab_venda) => cab_venda.numero == order.trans_cab && cab_venda.codprod == item.codprod && cab_venda.codprod1 == item.codprod1)
+            //const cab_venda = _.filter(skill_cab_vendas, (cab_venda) => cab_venda.numero == order.trans_cab && cab_venda.codprod == item.codprod && cab_venda.codprod1 == item.codprod1)
+            const cab_venda = _.filter(skill_cab_vendas, (cab_venda) => cab_venda.numero == order.trans_cab)
 
             if (_.size(cab_venda) > 0) {
               continue
@@ -352,26 +354,23 @@ export class Passo1Controller {
 
         await db.transaction(async (transaction) => {
           
-          const cab_venda = await db.query(`SELECT numero FROM skill_cab_vendas WHERE data BETWEEN '${req.body.inicio}' AND '${req.body.final}'`, {type: Sequelize.QueryTypes.SELECT, transaction})
-
           for (const item of req.body.items) {
 
-            if (item.trans_cab != 408661) {
-              continue
-            }
-  
-            if (_.size(_.filter(cab_venda, (venda) => venda.numero == item.trans_cab && venda.data == item.dataped)) == 0) {
+            const cab_venda = await db.query(`SELECT numero FROM skill_cab_vendas WHERE numero = ${item.trans_cab} AND codprod = ${item.codprod} AND codprod1 = ${item.codprod1} AND codloja = ${item.fat?.codloja}`, {type: Sequelize.QueryTypes.SELECT, transaction})
+
+            if (_.size(cab_venda) == 0) {
   
               const sqlInsert = `
-                INSERT INTO skill_cab_vendas (numero, data, codprod, codprod1, codloja) VALUES (${item.trans_cab}, '${dayjs(item.dataped).format('YYYY-MM-DD')}', ${item.codprod}, ${item.codprod1}, ${item.fat?.codloja});
+                INSERT INTO skill_cab_vendas (numero, data, codprod, codprod1, codloja)
+                VALUES (${item.trans_cab}, '${dayjs(item.dataped).format('YYYY-MM-DD')}', ${item.codprod}, ${item.codprod1}, ${item.fat?.codloja})
               `
   
               const sqlUpdate = `
                 UPDATE produto_pendente SET prod_pen_loja_id_saida = '${item.fat?.codloja}' WHERE prod_pen_id_pedido = '${item.trans_cab}' AND prod_pen_codigo_de_barras = '${item.codbarra}';
               `
   
-              //await db.query(sqlInsert, {type: Sequelize.QueryTypes.INSERT, transaction})
-              //await db.query(sqlUpdate, {type: Sequelize.QueryTypes.UPDATE, transaction})
+              await db.query(sqlInsert, {type: Sequelize.QueryTypes.INSERT, transaction})
+              await db.query(sqlUpdate, {type: Sequelize.QueryTypes.UPDATE, transaction})
 
             }
   

@@ -1,10 +1,11 @@
 import { Router } from 'express'
 import { EstoqueController } from '../controllers/estoque.controller.js'
+import { Passo5Controller } from '../controllers/passo-5.controller.js'
 
 export class Passo5Route {
 
     router = Router()
-    controller = new EstoqueController()
+    controller = new Passo5Controller()
 
     constructor() {
         this.intializeRoutes()

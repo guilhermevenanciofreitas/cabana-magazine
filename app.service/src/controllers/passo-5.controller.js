@@ -71,7 +71,7 @@ export class Passo5Controller {
 
         for (var item of productOrders) {
 
-          const cab_venda = _.filter(skill_cab_vendas, (item2) => item2.numero == item.trans_cab && dayjs(item2.data).format('YYYY-MM-DD') == dayjs(item.dataped).format('YYYY-MM-DD') && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
+          const cab_venda = _.filter(skill_cab_vendas, (item2) => item2.numero == item.trans_cab && item2.codprod == item.codprod && item2.codprod1 == item.codprod1)
           
           if (_.size(cab_venda) > 0) {
 

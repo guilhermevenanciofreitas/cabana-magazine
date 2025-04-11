@@ -306,4 +306,39 @@ export class Passo4Controller {
     }
   }
 
+  excluirArquivos = async (req, res) => {
+    try {
+
+      this.excluirArquivosDoDiretorio(path.join(directory.uploads, 'etiqueta'))
+      this.excluirArquivosDoDiretorio(path.join(directory.uploads, 'danfe'))
+
+      return res.status(200).json({message: 'Excluido com sucesso!'})
+
+    } catch (error) {
+      Exception.error(res, error)
+    }
+
+  }
+
+  excluirArquivosDoDiretorio = async (diretorio) => {
+    try {
+      const arquivos = await fs.promises.readdir(diretorio);
+  
+      for (const arquivo of arquivos) {
+        const caminhoCompleto = path.join(diretorio, arquivo);
+        const stats = await fs.promises.lstat(caminhoCompleto);
+  
+        if (stats.isFile()) {
+          await fs.promises.unlink(caminhoCompleto);
+          console.log(`Arquivo removido: ${caminhoCompleto}`);
+        }
+      }
+  
+      console.log('Todos os arquivos foram excluídos.');
+
+    } catch (erro) {
+      console.error('Erro ao excluir arquivos:', erro);
+    }
+  }
+
 }

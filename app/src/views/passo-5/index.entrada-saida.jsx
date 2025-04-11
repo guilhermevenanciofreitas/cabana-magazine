@@ -87,6 +87,7 @@ export class Passo5 extends React.Component {
         if (_.isEmpty(this.state?.request?.inicio)) {
           errors.push('Informe a data inicial')
         }
+        
 
         if (_.isEmpty(this.state?.request?.final)) {
           errors.push('Informe a data final')

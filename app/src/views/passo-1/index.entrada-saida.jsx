@@ -168,7 +168,7 @@ export class Passo1 extends React.Component {
       await new Service().Post('passo-1/salvar', {
         inicio: this.state?.request?.inicio,
         final: this.state?.request?.final,
-        items: _.filter(this.state?.response?.rows2, (item) => item.fat?.codloja == this.state?.request?.empresa?.loj_id)
+        items
       })
 
       await this.onSearch()

@@ -241,6 +241,43 @@ export class Passo4 extends React.Component {
       Loading.Hide()
     }
   }
+  
+  excluirArquivos = async () => {
+    try {
+
+      const { value: senha } = await Swal.fire({
+        title: '',
+        text: '', // mensagem vinda da resposta
+        icon: 'warning',
+        input: 'password',
+        inputLabel: 'Digite sua senha',
+        inputPlaceholder: 'Senha',
+        inputAttributes: {
+          autocapitalize: 'off',
+          autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Confirmar',
+        cancelButtonText: 'Cancelar'
+      })
+      
+      if (senha == '654@321') {
+          
+        this.setState({deleting: true})
+        await new Service().Post('passo-4/excluir-arquivos')
+
+        await toaster.push(<Message showIcon type='success'>Excluído com sucesso!</Message>, {placement: 'topEnd', duration: 5000 })
+
+      } else {
+        await toaster.push(<Message showIcon type='warning'>Senha incorreta!</Message>, {placement: 'topEnd', duration: 5000 })
+      }
+
+    } catch (error) {
+      Exception.error(error)
+    } finally {
+      this.setState({deleting: false})
+    }
+  }
 
   columns = [
     { selector: (row) => <input type="checkbox" checked={row.checked} onChange={() => this.onCheck(row, !row.checked)} />, name: 'Sep.', center: true, minWidth: '30px', maxWidth: '30px'},
@@ -326,6 +363,7 @@ export class Passo4 extends React.Component {
               <Button appearance="primary" color='blue' onClick={this.salvar} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Salvando...</> : <><FaCheckCircle /> &nbsp; Salvar</>}</Button>
               <Button appearance="primary" color='blue' onClick={this.uploadDanfe} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos DANFE</>}</Button>
               <Button appearance="primary" color='blue' onClick={this.uploadEtiqueta} disabled={this.state?.submting}>{this.state?.submting ? <><Loader /> &nbsp; Arquivando...</> : <><FaArchive /> &nbsp; Arquivos Etiqueta</>}</Button>
+              <Button appearance="primary" color='red' onClick={this.excluirArquivos} disabled={this.state?.deleting}>{this.state?.deleting ? <><Loader /> &nbsp; Excluindo...</> : <><FaArchive /> &nbsp; Excluir arquivos</>}</Button>
             </Stack>
           </Stack>
           

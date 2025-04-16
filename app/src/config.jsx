@@ -22,7 +22,7 @@ export const appNavs = [
   {
     eventKey: 'passo-3',
     icon: <Icon as={MdDashboard} />,
-    title: '3 - Gerar XML',
+    title: '3 - Faturamento',
     to: '/passo-3'
   },
   {

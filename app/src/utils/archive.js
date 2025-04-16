@@ -36,6 +36,7 @@ export class Archive {
             }
           
             return bytes
+            
         }
 
         const archive = base64ToBinary(base64)

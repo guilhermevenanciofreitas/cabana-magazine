@@ -175,13 +175,14 @@ export class Passo3 extends React.Component {
         dataTxt: selecteds
       })
 
-      await Archive.saveAs(response.data.xlsx, 'arquivo.xlsx')
+      await Archive.download(response.data.xlsx, 'arquivo.xlsx')
 
-      await Archive.saveAs(response.data.txt, 'arquivo.txt')
+      await Archive.download(response.data.txt, 'arquivo.txt')
 
       await this.onSearch()
 
     } catch (error) {
+      console.log(error)
       Exception.error(error);
     } finally {
       this.setState({ submting: false });
@@ -207,7 +208,7 @@ export class Passo3 extends React.Component {
   render = () => {
 
     return (
-      <Panel header={<CustomBreadcrumb title={'Gerar XML'} />}>
+      <Panel header={<CustomBreadcrumb title={'Faturamento'} />}>
 
         <PageContent>
           
